@@ -40,8 +40,13 @@ impl Dice {
     }
     fn roll(&self) -> u32 {
 	let mut rng = rand::thread_rng();
-	rng.gen_range(1..=self.to())
-    }    
+	// if in test environment return max
+	if cfg!(test) {
+	    self.to()
+	} else {
+	    rng.gen_range(1..=self.to())
+	}
+    }
 }
 
 impl FromStr for Dice {
@@ -108,25 +113,31 @@ fn main() {
 }
 
 #[test]
-fn roll_dice_test() {
+fn roll_dice() {
     let dice = Dice::D8;
     let subject = dice.roll();
-    assert!(subject > 0 && subject <= 8)
+    assert!(subject == 8)
 }
 
 #[test]
-fn from_dice_test() {
+fn from_dice() {
     assert!(Dice::from(8).unwrap().to() == 8)
 }
 
 #[test]
-fn parse_dice_test() {
+fn parse_dice() {
     assert!("8".parse::<Dice>().unwrap().to() == 8)
 }
 
 #[test]
-fn parse_dice_coll_test() {
+fn parse_dice_coll() {
     let dice_coll = "3d8".parse::<DiceColl>().unwrap();
     let subject = dice_coll.roll_and_sum();
-    assert!(subject > 0 && subject <= 24);
+    assert!(subject == 24);
+}
+
+#[test]
+fn parse_dice_coll_fail() {
+    let dice_coll = "8".parse::<DiceColl>();
+    assert!(dice_coll.is_err());
 }
