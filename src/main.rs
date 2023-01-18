@@ -14,9 +14,9 @@ enum Dice {
 #[derive(Debug)]
 struct ParseDiceError;
 impl Dice {
-    fn from(dice_type_numeric: u32) -> Result<Dice, ParseDiceError>
+    fn from(dice_numeric: u32) -> Result<Dice, ParseDiceError>
     {
-	match dice_type_numeric {
+	match dice_numeric {
 	    4 => Ok(Dice::D4),
 	    6 => Ok(Dice::D6),
 	    8 => Ok(Dice::D8),
@@ -47,7 +47,10 @@ impl Dice {
 impl FromStr for Dice {
     type Err = ParseDiceError;
     fn from_str(s: &str) -> Result<Dice, Self::Err> {
-	Dice::from(s.parse::<u32>().unwrap())
+	match s.parse::<u32>() {
+	    Ok(numeric) => Dice::from(numeric),
+	    Err(_) => Err(ParseDiceError)
+	}
     }
 }
 
@@ -74,21 +77,33 @@ impl FromStr for DiceColl {
     fn from_str(s: &str) -> Result<DiceColl, Self::Err> {
 	// expects form <Number>D<Number>	
 	let coll = s.split("d").collect::<Vec<&str>>();
-	let quantity = coll[0].parse::<u32>().unwrap();
-	let mut dice_vec = Vec::new();
-	for _ in 0..quantity {
-	    dice_vec.push(coll[1].parse::<Dice>().unwrap());
+	if coll.len() != 2 {
+	    Err(ParseDiceError)
+	} else {
+	    let quantity_result = coll[0].parse::<u32>();
+	    match quantity_result {
+		Ok(quantity) => {
+		    let mut dice_vec = Vec::new();
+		    for _ in 0..quantity {
+			dice_vec.push(coll[1].parse::<Dice>().unwrap());
+		    }
+		    Ok(DiceColl::from(dice_vec))
+		},
+		Err(_) => Err(ParseDiceError)
+	    }
 	}
-	Ok(DiceColl::from(dice_vec))	 
     }
 }
 
 fn main() {
     loop {
 	let mut input = String::new();
-	std::io::stdin().read_line(&mut input).expect("error");
-	let dice_coll = input.trim().parse::<DiceColl>().unwrap();
-	println!("{:?}", dice_coll.roll_and_sum());   
+	std::io::stdin().read_line(&mut input).expect("Failed reading from stdin");
+	let dice_coll_parse = input.trim().parse::<DiceColl>();
+	match dice_coll_parse {
+	    Ok(dice_coll) => println!("{:?}", dice_coll.roll_and_sum()),
+	    Err(_) => println!("Poorly formed dice roll input. Try again with the form: XdY where X and Y are unsigned whole numbers")
+	}
     }
 }
 
