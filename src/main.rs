@@ -1,7 +1,8 @@
 use std::str::FromStr;
 use rand::Rng;
 
-enum Dice {
+#[derive(PartialEq)]
+pub enum Dice {
     D4,
     D6,
     D8,
@@ -11,10 +12,10 @@ enum Dice {
     D100
 }
 
-#[derive(Debug)]
-struct ParseDiceError;
+#[derive(Debug, PartialEq)]
+pub struct ParseDiceError;
 impl Dice {
-    fn from(dice_numeric: u32) -> Result<Dice, ParseDiceError>
+    pub fn from(dice_numeric: u32) -> Result<Dice, ParseDiceError>
     {
 	match dice_numeric {
 	    4 => Ok(Dice::D4),
@@ -38,7 +39,7 @@ impl Dice {
 	    Dice::D100 => 100
 	}
     }
-    fn roll(&self) -> u32 {
+    pub fn roll(&self) -> u32 {
 	let mut rng = rand::thread_rng();
 	// if in test environment return max
 	if cfg!(test) {
@@ -59,20 +60,20 @@ impl FromStr for Dice {
     }
 }
 
-struct DiceColl(Vec<Dice>);
+pub struct DiceColl(Vec<Dice>);
 
 impl DiceColl {
-    fn from(dice_coll : Vec<Dice>) -> DiceColl {
+    pub fn from(dice_coll : Vec<Dice>) -> DiceColl {
 	DiceColl(dice_coll)
     }
-    fn roll(&self) -> Vec<u32> {
+    pub fn roll(&self) -> Vec<u32> {
 	let mut rolls = Vec::new();
 	for dice in &self.0 {
 	    rolls.push(dice.roll())
 	}
 	rolls
     }
-    fn roll_and_sum(&self) -> u32 {
+    pub fn roll_and_sum(&self) -> u32 {
 	self.roll().iter().sum()
     }
 }
@@ -80,6 +81,8 @@ impl DiceColl {
 impl FromStr for DiceColl {
     type Err = ParseDiceError;
     fn from_str(s: &str) -> Result<DiceColl, Self::Err> {
+	// TODO: cleanup impl
+	
 	// expects form <Number>D<Number>	
 	let coll = s.split("d").collect::<Vec<&str>>();
 	if coll.len() != 2 {
@@ -112,32 +115,68 @@ fn main() {
     }
 }
 
-#[test]
-fn roll_dice() {
-    let dice = Dice::D8;
-    let subject = dice.roll();
-    assert!(subject == 8)
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn dice_to() {
+	let dice = Dice::D8;
+	assert!(dice.to() == 8);
+    }
 
-#[test]
-fn from_dice() {
-    assert!(Dice::from(8).unwrap().to() == 8)
-}
+    #[test]
+    fn dice_roll() {
+	let dice = Dice::D8;
+	let subject = dice.roll();
+	assert!(subject == 8);
+    }
 
-#[test]
-fn parse_dice() {
-    assert!("8".parse::<Dice>().unwrap().to() == 8)
-}
+    #[test]
+    fn from_dice_ok() {
+	let subject = Dice::from(8);
+	assert!(subject.is_ok());
+    }
 
-#[test]
-fn parse_dice_coll() {
-    let dice_coll = "3d8".parse::<DiceColl>().unwrap();
-    let subject = dice_coll.roll_and_sum();
-    assert!(subject == 24);
-}
+    #[test]
+    fn from_dice_err() {
+	let subject = Dice::from(0);
+	assert!(subject.is_err());
+    }
 
-#[test]
-fn parse_dice_coll_fail() {
-    let dice_coll = "8".parse::<DiceColl>();
-    assert!(dice_coll.is_err());
+    #[test]
+    fn from_dice() {
+	let subject = Dice::from(8).unwrap();
+	assert!(subject == Dice::D8);
+    }
+
+    #[test]
+    fn parse_dice_ok() {
+	let subject = "8".parse::<Dice>();
+	assert!(subject.is_ok());
+    }
+
+    #[test]
+    fn parse_dice_err() {
+	let subject = "".parse::<Dice>();
+	assert!(subject.is_err());
+    }
+
+    #[test]
+    fn parse_dice_coll_ok() {
+	let dice_coll = "3d8".parse::<DiceColl>();
+	assert!(dice_coll.is_ok());
+    }
+
+    #[test]
+    fn parse_dice_coll_err() {
+	let dice_coll = "8".parse::<DiceColl>();
+	assert!(dice_coll.is_err());
+    }
+
+    #[test]
+    fn parse_dice_coll_roll_and_sum() {
+	let dice_coll = "3d8".parse::<DiceColl>().unwrap();
+	let subject = dice_coll.roll_and_sum();
+	assert!(subject == 24);
+    }
 }
