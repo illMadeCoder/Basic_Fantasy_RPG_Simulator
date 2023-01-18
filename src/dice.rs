@@ -1,5 +1,8 @@
 use std::str::FromStr;
 use rand::Rng;
+use std::convert::{TryFrom, TryInto, From, Into};
+
+pub type DiceN = u8;
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Dice {
@@ -13,11 +16,25 @@ pub enum Dice {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct ParseDiceError;
+pub struct InitializeDiceError;
 impl Dice {
-    pub fn from(dice_numeric: u32) -> Result<Dice, ParseDiceError>
-    {
-	match dice_numeric {
+    pub fn roll(self) -> DiceN {
+	// if in test environment return max
+	let dice_value = self.into();
+	if cfg!(test) {
+	    dice_value
+	} else {
+	    let mut rng = rand::thread_rng();
+	    rng.gen_range(1..=dice_value)
+	}
+    }
+}
+
+impl TryFrom<DiceN> for Dice {
+    type Error = InitializeDiceError;
+
+    fn try_from(value: DiceN) -> Result<Self, Self::Error> {
+	match value {
 	    4 => Ok(Dice::D4),
 	    6 => Ok(Dice::D6),
 	    8 => Ok(Dice::D8),
@@ -25,11 +42,14 @@ impl Dice {
 	    12 => Ok(Dice::D12),
 	    20 => Ok(Dice::D20),
 	    100 => Ok(Dice::D100),
-	    _ => Err(ParseDiceError)
+	    _ => Err(InitializeDiceError)
 	}
     }
-    fn to(&self) -> u32 {
-	match self {
+}
+
+impl From<Dice> for DiceN {
+    fn from(value: Dice) -> Self {
+    	match value {
 	    Dice::D4 => 4,
 	    Dice::D6 => 6,
 	    Dice::D8 => 8,
@@ -39,77 +59,22 @@ impl Dice {
 	    Dice::D100 => 100
 	}
     }
-    pub fn roll(&self) -> u32 {
-	let mut rng = rand::thread_rng();
-	// if in test environment return max
-	if cfg!(test) {
-	    self.to()
-	} else {
-	    rng.gen_range(1..=self.to())
-	}
-    }
 }
 
+#[derive(Debug, PartialEq)]
+pub struct ParseDiceError;
 impl FromStr for Dice {
     type Err = ParseDiceError;
     fn from_str(s: &str) -> Result<Dice, Self::Err> {
-	match s.parse::<u32>() {
-	    Ok(numeric) => Dice::from(numeric),
+	match s.parse::<DiceN>() {
+	    Ok(numeric) => match numeric.try_into() {
+		Ok(dice) => Ok(dice),
+		Err(_) => Err(ParseDiceError)
+	    },
 	    Err(_) => Err(ParseDiceError)
 	}
     }
 }
-
-pub struct DicePool(Vec<Dice>);
-
-impl DicePool {
-    pub fn new(quantity : usize , dice: Dice) -> DicePool {
-	DicePool(vec![dice; quantity])
-    }
-    pub fn from(dicepool : Vec<Dice>) -> DicePool {
-	DicePool(dicepool)
-    }
-    pub fn roll(&self) -> Vec<u32> {
-	let mut rolls = Vec::new();
-	for dice in &self.0 {
-	    rolls.push(dice.roll())
-	}
-	rolls
-    }
-    pub fn roll_and_sum(&self) -> u32 {
-	self.roll().iter().sum()
-    }
-}
-
-impl FromStr for DicePool {
-    type Err = ParseDiceError;
-    fn from_str(s: &str) -> Result<DicePool, Self::Err> {
-	// expects form <Unsigned Whole Number>d<Unsigned Whole Number>
-	let coll = s.split("d").collect::<Vec<&str>>();
-	if coll.len() != 2 {
-	    return Err(ParseDiceError)
-	}
-	
-	let quantity = match coll[0].parse::<u32>() {
-	    Ok(n) => n,
-	    Err(_) => return Err(ParseDiceError)
-	};
-	
-	let dice = match coll[1].parse::<Dice>() {
-	    Ok(n) => n,
-	    Err(_) => return Err(ParseDiceError)
-	};
-	
-	let mut dice_vec = Vec::new();	
-	for _ in 0..quantity {
-	    dice_vec.push(dice);
-	}
-	
-	Ok(DicePool::from(dice_vec))	
-    }
-}
-
-
 
 #[cfg(test)]
 mod tests {
@@ -117,7 +82,8 @@ mod tests {
     #[test]
     fn dice_to() {
 	let dice = Dice::D8;
-	assert!(dice.to() == 8);
+	let subject : DiceN = dice.into();
+	assert!(subject == 8);
     }
 
     #[test]
@@ -129,19 +95,19 @@ mod tests {
 
     #[test]
     fn from_dice_ok() {
-	let subject = Dice::from(8);
+	let subject = Dice::try_from(8);
 	assert!(subject.is_ok());
     }
 
     #[test]
     fn from_dice_err() {
-	let subject = Dice::from(0);
+	let subject = Dice::try_from(0);
 	assert!(subject.is_err());
     }
 
     #[test]
     fn from_dice() {
-	let subject = Dice::from(8).unwrap();
+	let subject = Dice::try_from(8).unwrap();
 	assert!(subject == Dice::D8);
     }
 
@@ -155,24 +121,5 @@ mod tests {
     fn parse_dice_err() {
 	let subject = "".parse::<Dice>();
 	assert!(subject.is_err());
-    }
-
-    #[test]
-    fn parse_dicepool_ok() {
-	let dicepool = "3d8".parse::<DicePool>();
-	assert!(dicepool.is_ok());
-    }
-
-    #[test]
-    fn parse_dicepool_err() {
-	let dicepool = "8".parse::<DicePool>();
-	assert!(dicepool.is_err());
-    }
-
-    #[test]
-    fn parse_dicepool_roll_and_sum() {
-	let dicepool = "3d8".parse::<DicePool>().unwrap();
-	let subject = dicepool.roll_and_sum();
-	assert!(subject == 24);
     }
 }

@@ -1,6 +1,9 @@
 mod dice;
 mod character;
+mod dicepool;
+
 use dice::*;
+use dicepool::*;
 use character::*;
 
 use std::io;
@@ -41,7 +44,7 @@ fn main() {
 	pause();
 	let stats_dicepool = DicePool::new(3,Dice::D6);
 	let roll = stats_dicepool.roll();
-	let sum : u32 = roll.iter().sum();	
+	let sum : DiceN = roll.iter().sum();	
 	println!("{:?} = {sum}", roll);
 	let str = sum;
 	
@@ -50,7 +53,7 @@ fn main() {
 	pause();
 	let stats_dicepool = DicePool::new(3,Dice::D6);
 	let roll = stats_dicepool.roll();
-	let sum : u32 = roll.iter().sum();
+	let sum : DiceN = roll.iter().sum();
 	println!("{:?} = {sum}", roll);
 	let dex = sum;
     }
