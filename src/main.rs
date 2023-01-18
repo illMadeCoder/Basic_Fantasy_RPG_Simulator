@@ -93,7 +93,8 @@ impl FromStr for DiceColl {
 		Ok(quantity) => {
 		    let mut dice_vec = Vec::new();
 		    for _ in 0..quantity {
-			dice_vec.push(coll[1].parse::<Dice>().unwrap());
+			let dice = coll[1].parse::<Dice>()?;
+			dice_vec.push(dice);
 		    }
 		    Ok(DiceColl::from(dice_vec))
 		},
