@@ -63,6 +63,9 @@ impl FromStr for Dice {
 pub struct DicePool(Vec<Dice>);
 
 impl DicePool {
+    pub fn new(quantity : usize , dice: Dice) -> DicePool {
+	DicePool(vec![dice; quantity])
+    }
     pub fn from(dicepool : Vec<Dice>) -> DicePool {
 	DicePool(dicepool)
     }
