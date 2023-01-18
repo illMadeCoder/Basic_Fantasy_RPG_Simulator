@@ -60,11 +60,11 @@ impl FromStr for Dice {
     }
 }
 
-pub struct DiceColl(Vec<Dice>);
+pub struct DicePool(Vec<Dice>);
 
-impl DiceColl {
-    pub fn from(dice_coll : Vec<Dice>) -> DiceColl {
-	DiceColl(dice_coll)
+impl DicePool {
+    pub fn from(dicepool : Vec<Dice>) -> DicePool {
+	DicePool(dicepool)
     }
     pub fn roll(&self) -> Vec<u32> {
 	let mut rolls = Vec::new();
@@ -78,9 +78,9 @@ impl DiceColl {
     }
 }
 
-impl FromStr for DiceColl {
+impl FromStr for DicePool {
     type Err = ParseDiceError;
-    fn from_str(s: &str) -> Result<DiceColl, Self::Err> {
+    fn from_str(s: &str) -> Result<DicePool, Self::Err> {
 	// expects form <Unsigned Whole Number>d<Unsigned Whole Number>
 	let coll = s.split("d").collect::<Vec<&str>>();
 	if coll.len() != 2 {
@@ -102,7 +102,7 @@ impl FromStr for DiceColl {
 	    dice_vec.push(dice);
 	}
 	
-	Ok(DiceColl::from(dice_vec))	
+	Ok(DicePool::from(dice_vec))	
     }
 }
 
@@ -155,21 +155,21 @@ mod tests {
     }
 
     #[test]
-    fn parse_dice_coll_ok() {
-	let dice_coll = "3d8".parse::<DiceColl>();
-	assert!(dice_coll.is_ok());
+    fn parse_dicepool_ok() {
+	let dicepool = "3d8".parse::<DicePool>();
+	assert!(dicepool.is_ok());
     }
 
     #[test]
-    fn parse_dice_coll_err() {
-	let dice_coll = "8".parse::<DiceColl>();
-	assert!(dice_coll.is_err());
+    fn parse_dicepool_err() {
+	let dicepool = "8".parse::<DicePool>();
+	assert!(dicepool.is_err());
     }
 
     #[test]
-    fn parse_dice_coll_roll_and_sum() {
-	let dice_coll = "3d8".parse::<DiceColl>().unwrap();
-	let subject = dice_coll.roll_and_sum();
+    fn parse_dicepool_roll_and_sum() {
+	let dicepool = "3d8".parse::<DicePool>().unwrap();
+	let subject = dicepool.roll_and_sum();
 	assert!(subject == 24);
     }
 }
