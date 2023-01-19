@@ -58,11 +58,11 @@ impl DicePool {
     }
     
     pub fn roll(&self) -> Vec<DiceNumType> {
-	self.0.iter().map(|x| x.roll()).collect()
+	self.0.iter().map(|&x| x.roll()).collect()
     }
     
-    pub fn roll_and_sum(&self) -> DiceNumType {
-	self.roll().iter().sum()
+    pub fn roll_and_sum(&self) -> u32 {
+	self.roll().iter().map(|&x| x as u32).sum()
     }
 }
 
