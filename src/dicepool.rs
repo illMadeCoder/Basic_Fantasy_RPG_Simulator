@@ -52,6 +52,8 @@ impl TryFrom<Vec<DiceNumType>> for DicePool {
     }
 }
 
+pub type DiceRollSum = (Vec<Dice>, Vec<u8>, u32);
+
 impl DicePool {
     pub fn new(quantity : usize , dice: Dice) -> DicePool {
 	DicePool(vec![dice; quantity])
@@ -61,10 +63,11 @@ impl DicePool {
 	self.0.iter().map(|&x| x.roll()).collect()
     }
     
-    pub fn roll_and_sum(&self) -> (Vec<u8>, u32) {
+    pub fn roll_and_sum(&self) -> DiceRollSum {
+	let dice = self.0.clone();
 	let roll = self.roll();
 	let sum = roll.iter().cloned().map(u32::from).sum();
-	(roll, sum)
+	(dice, roll, sum)
     }
 }
 

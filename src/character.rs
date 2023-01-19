@@ -1,28 +1,33 @@
-enum Species {
+pub enum Species {
     Dwarf,
     Elf,       
     Halfling,
     Human
 }
 
-struct Character {
+pub type SkillType = i64;
+pub type HpType = i64;
+
+pub struct Character {
     name: String,
     species: Species,
-    hp: i32,
-    str: i32,
-    dex: i32,
-    int: i32,
-    cha: i32,    
+    hp: HpType,
+    str: SkillType,
+    dex: SkillType,
+    int: SkillType,
+    wis: SkillType,
+    cha: SkillType,    
 }
 
 impl Character {
     pub fn new(name: &str,
 	       species: Species,
-	       hp: i32,
-	       str: i32,
-	       dex: i32,
-	       int: i32,
-	       cha: i32) -> Character {
+	       hp: HpType,
+	       str: SkillType,
+	       dex: SkillType,
+	       int: SkillType,
+	       wis: SkillType,
+	       cha: SkillType) -> Character {
 	Character {
 	    name: String::from(name),
 	    species,
@@ -30,6 +35,7 @@ impl Character {
 	    str,
 	    dex,
 	    int,
+	    wis,
 	    cha,
 	}
     }
