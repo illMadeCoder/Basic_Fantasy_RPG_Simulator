@@ -1,52 +1,84 @@
-use crate::dice::*;
+use crate::dice::{Dice, DiceNumType, DiceError};
 use std::str::FromStr;
+use std::convert::From;
+
+#[derive(Debug)]
+pub enum DicePoolError {
+    DiceError(DiceError),
+    DicePoolParseError(String),    
+    ParseIntError(std::num::ParseIntError)
+}
+
+impl std::error::Error for DicePoolError {}
+
+impl std::fmt::Display for DicePoolError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+	match self {
+	    DicePoolError::DiceError(e) => e.fmt(f),
+	    DicePoolError::DicePoolParseError(s) => write!(f, "DicePoolParseError: {}", s),
+	    DicePoolError::ParseIntError(e) => e.fmt(f),
+	}
+    }
+}
+
+impl From<std::num::ParseIntError> for DicePoolError {
+    fn from(e: std::num::ParseIntError) -> Self {
+	DicePoolError::ParseIntError(e)
+    }
+}
+
+impl From<DiceError> for DicePoolError {
+    fn from(e: DiceError) -> Self {
+	DicePoolError::DiceError(e)
+    }
+}
 
 pub struct DicePool(Vec<Dice>);
+
+impl From<Vec<Dice>> for DicePool {
+    fn from(dicepool : Vec<Dice>) -> Self {
+	DicePool(dicepool)
+    }
+}
+
+impl TryFrom<Vec<DiceNumType>> for DicePool {
+    type Error = DicePoolError;
+    
+    fn try_from(dicepool : Vec<DiceNumType>) -> Result<Self, Self::Error> {
+	let r : Result<Vec<Dice>, DiceError> = dicepool.into_iter().map(|x| Dice::try_from(x)).collect();
+	// TODO: remove intermediate step for v, if we ? at the end of collect() it requires type anno
+	let v = r?;
+	Ok(DicePool(v))
+    }
+}
 
 impl DicePool {
     pub fn new(quantity : usize , dice: Dice) -> DicePool {
 	DicePool(vec![dice; quantity])
     }
-    pub fn from(dicepool : Vec<Dice>) -> DicePool {
-	DicePool(dicepool)
-    }
-    pub fn roll(&self) -> Vec<DiceN> {
+    
+    pub fn roll(&self) -> Vec<DiceNumType> {
 	let mut rolls = Vec::new();
 	for dice in &self.0 {
 	    rolls.push(dice.roll())
 	}
 	rolls
     }
-    pub fn roll_and_sum(&self) -> DiceN {
+    
+    pub fn roll_and_sum(&self) -> DiceNumType {
 	self.roll().iter().sum()
     }
 }
 
 impl FromStr for DicePool {
-    type Err = ParseDiceError;
+    type Err = DicePoolError;
+    
     fn from_str(s: &str) -> Result<DicePool, Self::Err> {
-	// expects form <Unsigned Whole Number>d<Unsigned Whole Number>
-	let coll = s.split("d").collect::<Vec<&str>>();
-	if coll.len() != 2 {
-	    return Err(ParseDiceError)
-	}
+	let (quantity_str, dice_str) = s.split_once("d").ok_or(DicePoolError::DicePoolParseError(String::from(s)))?;
+	let quantity = quantity_str.parse::<usize>()?;
+	let dice = dice_str.parse::<Dice>()?;
 	
-	let quantity = match coll[0].parse::<DiceN>() {
-	    Ok(n) => n,
-	    Err(_) => return Err(ParseDiceError)
-	};
-	
-	let dice = match coll[1].parse::<Dice>() {
-	    Ok(n) => n,
-	    Err(_) => return Err(ParseDiceError)
-	};
-	
-	let mut dice_vec = Vec::new();	
-	for _ in 0..quantity {
-	    dice_vec.push(dice);
-	}
-	
-	Ok(DicePool::from(dice_vec))	
+	Ok(DicePool::from(vec![dice; quantity]))
     }
 }
 
@@ -66,8 +98,20 @@ mod test {
 
     #[test]
     fn parse_dicepool_roll_and_sum() {
-	let dicepool = "3d8".parse::<DicePool>().unwrap();
+	let dicepool = DicePool::new(3, Dice::D8);
 	let subject = dicepool.roll_and_sum();
 	assert!(subject == 24);
     }
+
+    #[test]
+    fn parse_dicepool_parse_int_error() {
+	assert!("ad8".parse::<DicePool>().is_err())
+    }
+
+    // #[test]
+    // fn vec_dicepool_from_dicenumtype_ok() {
+    // 	let subject = DicePool::try_from(vec!([1, 2, 3]));
+    // }
 }
+
+

@@ -1,24 +1,44 @@
-use std::str::FromStr;
+use std::{str::FromStr, num::ParseIntError};
 use rand::Rng;
 use std::convert::{TryFrom, TryInto, From, Into};
 
-pub type DiceN = u8;
+pub type DiceNumType = u8;
+
+#[derive(Debug)]
+pub enum DiceError {
+    InvalidDiceNumError(DiceNumType),
+    ParseIntError(ParseIntError)
+}
+
+impl std::error::Error for DiceError { }
+impl std::fmt::Display for DiceError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+	match self {
+	    DiceError::InvalidDiceNumError(num) => write!(f, "InvalidDiceNumError: {}", num),
+	    DiceError::ParseIntError(e) => e.fmt(f)
+	}
+    }
+}
+
+impl From<ParseIntError> for DiceError {
+    fn from(value: ParseIntError) -> Self {
+	DiceError::ParseIntError(value)
+    }
+}
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum Dice {
-    D4,
-    D6,
-    D8,
-    D10,
-    D12,
-    D20,
-    D100
+    D4 = 4,
+    D6 = 6,
+    D8 = 8,
+    D10 = 10,
+    D12 = 12,
+    D20 = 20,
+    D100 = 100
 }
 
-#[derive(Debug, PartialEq)]
-pub struct InitializeDiceError;
 impl Dice {
-    pub fn roll(self) -> DiceN {
+    pub fn roll(self) -> DiceNumType {
 	// if in test environment return max
 	let dice_value = self.into();
 	if cfg!(test) {
@@ -30,49 +50,35 @@ impl Dice {
     }
 }
 
-impl TryFrom<DiceN> for Dice {
-    type Error = InitializeDiceError;
+// TODO: prefer to use a generic type that can into DiceNumType
+impl TryFrom<DiceNumType> for Dice {
+    type Error = DiceError;
 
-    fn try_from(value: DiceN) -> Result<Self, Self::Error> {
+    fn try_from(value: DiceNumType) -> Result<Self, Self::Error> {
 	match value {
-	    4 => Ok(Dice::D4),
-	    6 => Ok(Dice::D6),
-	    8 => Ok(Dice::D8),
-	    10 => Ok(Dice::D10),
-	    12 => Ok(Dice::D12),
-	    20 => Ok(Dice::D20),
-	    100 => Ok(Dice::D100),
-	    _ => Err(InitializeDiceError)
+	    x if x == Dice::D4 as DiceNumType => Ok(Dice::D4),
+	    x if x == Dice::D6 as DiceNumType => Ok(Dice::D6),
+	    x if x == Dice::D8 as DiceNumType => Ok(Dice::D8),
+	    x if x == Dice::D10 as DiceNumType => Ok(Dice::D10),
+	    x if x == Dice::D12 as DiceNumType => Ok(Dice::D12),
+	    x if x == Dice::D20 as DiceNumType => Ok(Dice::D20),
+	    x if x == Dice::D100 as DiceNumType => Ok(Dice::D100),
+	    _ => Err(DiceError::InvalidDiceNumError(value))
 	}
     }
 }
 
-impl From<Dice> for DiceN {
+impl From<Dice> for DiceNumType {
     fn from(value: Dice) -> Self {
-    	match value {
-	    Dice::D4 => 4,
-	    Dice::D6 => 6,
-	    Dice::D8 => 8,
-	    Dice::D10 => 10,
-	    Dice::D12 => 12,
-	    Dice::D20 => 20,
-	    Dice::D100 => 100
-	}
+	value as DiceNumType
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub struct ParseDiceError;
 impl FromStr for Dice {
-    type Err = ParseDiceError;
+    type Err = DiceError;
+    
     fn from_str(s: &str) -> Result<Dice, Self::Err> {
-	match s.parse::<DiceN>() {
-	    Ok(numeric) => match numeric.try_into() {
-		Ok(dice) => Ok(dice),
-		Err(_) => Err(ParseDiceError)
-	    },
-	    Err(_) => Err(ParseDiceError)
-	}
+	s.parse::<DiceNumType>().map(|n| n.try_into())?
     }
 }
 
@@ -82,7 +88,7 @@ mod tests {
     #[test]
     fn dice_to() {
 	let dice = Dice::D8;
-	let subject : DiceN = dice.into();
+	let subject : DiceNumType = dice.into();
 	assert!(subject == 8);
     }
 
