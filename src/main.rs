@@ -9,6 +9,8 @@ use character::*;
 use std::io;
 use std::io::prelude::*;
 
+use names::Generator;
+
 fn pause() {
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
@@ -46,11 +48,11 @@ fn roll_dicepool_prompt(opt_mandatory_roll: Option<&str>) -> DiceRollSum {
     }
 }
 
-fn prompt_character_stat_roll(prompt_stat_name : &str) -> SkillType {
+fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
     println!("Roll 3d6 for {}:", prompt_stat_name);
     let dice_roll_sum = roll_dicepool_prompt(Some("3d6"));
     println!("{:?}", dice_roll_sum);
-    dice_roll_sum.2 as SkillType
+    dice_roll_sum.2 as AbilityScoreType
 }
 
 fn prompt_create_character() -> Character {
@@ -64,6 +66,8 @@ fn prompt_create_character() -> Character {
     let wis_roll = prompt_character_stat_roll("Wisdom");
     println!();
     let cha_roll = prompt_character_stat_roll("Charisma");
+    println!();
+    let con_roll = prompt_character_stat_roll("Charisma");
     println!();
     // choose a race
     // minimum and maximum skills for races
@@ -83,32 +87,38 @@ fn prompt_create_character() -> Character {
     Character {
 	name: String::from("hello"),
 	species: Species::Human,
-	class: Class::Fighter,
-	hp: 4,
-	str: str_roll,
-	dex: dex_roll,
-	int: int_roll,
-	wis: wis_roll,
-	cha: cha_roll
+	class: Class::Fighter,	
+	ability_scores: AbilityScores {str: str_roll,
+				       dex: dex_roll,
+				       int: int_roll,
+				       wis: wis_roll,
+				       cha: cha_roll,
+				       con: con_roll}
     }
 }
 
 fn auto_create_character() -> Character {
-    let skill_dicepool = DicePool::new(3, Dice::D6);
+    let mut name_generator = Generator::default();
+    let ability_score_dicepool = DicePool::new(3, Dice::D6);
+    let gen_name = name_generator.next().unwrap();
+    let dice = Dice::D4;
+    
     Character {
-	name: String::from("hello"),
-	species: Species::Human,
-	class: Class::Fighter,
-	hp: 4,
-	str: skill_dicepool.roll_and_sum().2 as i64,
-	dex: skill_dicepool.roll_and_sum().2 as i64,
-	int: skill_dicepool.roll_and_sum().2 as i64,
-	wis: skill_dicepool.roll_and_sum().2 as i64,
-	cha: skill_dicepool.roll_and_sum().2 as i64,
+	name: gen_name,
+	species: dice.roll().try_into().unwrap(),
+	class: dice.roll().try_into().unwrap(),
+	ability_scores: AbilityScores {
+	    str: ability_score_dicepool.roll_and_sum().2 as i64,
+	    dex: ability_score_dicepool.roll_and_sum().2 as i64,
+	    int: ability_score_dicepool.roll_and_sum().2 as i64,
+	    wis: ability_score_dicepool.roll_and_sum().2 as i64,
+	    cha: ability_score_dicepool.roll_and_sum().2 as i64,
+	    con: ability_score_dicepool.roll_and_sum().2 as i64,	    
+	}
     }
 }
 
-// fn prompt_character_stat_roll(prompt_stat_name : &str) -> SkillType {
+// fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
 // }
 
 fn main() {
