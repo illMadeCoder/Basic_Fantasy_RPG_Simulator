@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum Species {
     Dwarf,
     Elf,       
@@ -5,38 +6,26 @@ pub enum Species {
     Human
 }
 
+#[derive(Debug)]
+pub enum Class {
+    Cleric,
+    Fighter,       
+    MagicUser,
+    Thief    
+}
+
 pub type SkillType = i64;
 pub type HpType = i64;
 
+#[derive(Debug)]
 pub struct Character {
-    name: String,
-    species: Species,
-    hp: HpType,
-    str: SkillType,
-    dex: SkillType,
-    int: SkillType,
-    wis: SkillType,
-    cha: SkillType,    
-}
-
-impl Character {
-    pub fn new(name: &str,
-	       species: Species,
-	       hp: HpType,
-	       str: SkillType,
-	       dex: SkillType,
-	       int: SkillType,
-	       wis: SkillType,
-	       cha: SkillType) -> Character {
-	Character {
-	    name: String::from(name),
-	    species,
-	    hp,
-	    str,
-	    dex,
-	    int,
-	    wis,
-	    cha,
-	}
-    }
+    pub name: String,
+    pub species: Species,
+    pub class: Class,
+    pub hp: HpType,
+    pub str: SkillType,
+    pub dex: SkillType,
+    pub int: SkillType,
+    pub wis: SkillType,
+    pub cha: SkillType,    
 }

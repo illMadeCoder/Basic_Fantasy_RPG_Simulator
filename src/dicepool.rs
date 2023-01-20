@@ -101,7 +101,7 @@ mod test {
     fn parse_dicepool_roll_and_sum() {
 	let dicepool = DicePool::new(3, Dice::D8);
 	let subject = dicepool.roll_and_sum();
-	assert!(subject == 24);
+	assert!(subject.2 == 24);
     }
 
     #[test]

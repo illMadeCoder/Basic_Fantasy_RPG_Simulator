@@ -53,6 +53,64 @@ fn prompt_character_stat_roll(prompt_stat_name : &str) -> SkillType {
     dice_roll_sum.2 as SkillType
 }
 
+fn prompt_create_character() -> Character {
+    // TODO: potentially use reflection or something on a Skill type to prompt for each stat
+    let str_roll = prompt_character_stat_roll("Strength");
+    println!();
+    let dex_roll = prompt_character_stat_roll("Dexterity");
+    println!();
+    let int_roll = prompt_character_stat_roll("Intelligence");
+    println!();
+    let wis_roll = prompt_character_stat_roll("Wisdom");
+    println!();
+    let cha_roll = prompt_character_stat_roll("Charisma");
+    println!();
+    // choose a race
+    // minimum and maximum skills for races
+    // race powers
+    // choose a class
+    // your class must meet the prime requisite for you class
+    // magic user spells
+    // 0 xp
+    // xp to advance per class
+    // roll hit dice for class adding con
+    // roll starting money 3d6 * 10 gold
+    // purchase equipment
+    // determine ac
+    // determine attack bonus
+    // saving throws
+    // name character
+    Character {
+	name: String::from("hello"),
+	species: Species::Human,
+	class: Class::Fighter,
+	hp: 4,
+	str: str_roll,
+	dex: dex_roll,
+	int: int_roll,
+	wis: wis_roll,
+	cha: cha_roll
+    }
+}
+
+fn auto_create_character() -> Character {
+    let skill_dicepool = DicePool::new(3, Dice::D6);
+    Character {
+	name: String::from("hello"),
+	species: Species::Human,
+	class: Class::Fighter,
+	hp: 4,
+	str: skill_dicepool.roll_and_sum().2 as i64,
+	dex: skill_dicepool.roll_and_sum().2 as i64,
+	int: skill_dicepool.roll_and_sum().2 as i64,
+	wis: skill_dicepool.roll_and_sum().2 as i64,
+	cha: skill_dicepool.roll_and_sum().2 as i64,
+    }
+}
+
+// fn prompt_character_stat_roll(prompt_stat_name : &str) -> SkillType {
+// }
+
 fn main() {
     loop {
 	// let mut input = String::new();
@@ -64,17 +122,7 @@ fn main() {
 	// println!("rolling strength");
 	// println!("roll 3d6");
 	
-	// TODO: potentially use reflection or something on a Skill type to prompt for each stat
-	let str_roll = prompt_character_stat_roll("Strength");
-	println!();
-	let dex_roll = prompt_character_stat_roll("Dexterity");
-	println!();
-	let int_roll = prompt_character_stat_roll("Intelligence");
-	println!();
-	let wis_roll = prompt_character_stat_roll("Wisdom");
-	println!();
-	let cha_roll = prompt_character_stat_roll("Charisma");
-	println!();
+	println!("{:?}", auto_create_character())
 	//pause();
 
 	// let stats_dicepool = DicePool::new(3,Dice::D6);
@@ -93,3 +141,4 @@ fn main() {
 	
     }
 }
+
