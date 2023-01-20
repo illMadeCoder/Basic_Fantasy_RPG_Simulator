@@ -83,6 +83,7 @@ impl FromStr for DicePool {
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
     #[test]

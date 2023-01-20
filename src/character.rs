@@ -1,3 +1,8 @@
+use names::Generator;
+use crate::dicepool::DicePool;
+use crate::dice::Dice;
+use rand::Rng;
+
 #[derive(Debug)]
 pub enum Species {
     Dwarf = 1,
@@ -52,8 +57,8 @@ impl Species {
 
 #[derive(Debug)]
 pub enum CharacterError {
-    SpeciesError,
-    ClassError
+    SpeciesError(u8),
+    ClassError(u8)
 }
 
 impl TryFrom<u8> for Species {
@@ -64,7 +69,7 @@ impl TryFrom<u8> for Species {
 	    x if x == Species::Elf as u8 => Ok(Species::Elf),
 	    x if x == Species::Halfling as u8 => Ok(Species::Halfling),
 	    x if x == Species::Human as u8 => Ok(Species::Human),
-	    _ => Err(CharacterError::SpeciesError)
+	    x => Err(CharacterError::SpeciesError(x))
 	}
     }
 }
@@ -85,7 +90,7 @@ impl TryFrom<u8> for Class {
 	    x if x == Class::Fighter as u8 => Ok(Class::Fighter),
 	    x if x == Class::MagicUser as u8 => Ok(Class::MagicUser),
 	    x if x == Class::Thief as u8 => Ok(Class::Thief),
-	    _ => Err(CharacterError::ClassError)
+	    x => Err(CharacterError::ClassError(x))
 	}
     }
 }
@@ -134,12 +139,36 @@ pub struct Character {
 }
 
 impl Character {
+    pub fn ability_score_dicepool() -> DicePool {
+	DicePool::new(3, Dice::D6)
+    }
+    
     pub fn new(name: String, species: Species, class: Class, ability_scores: AbilityScores) -> Character {
 	Character {
 	    name,
 	    species,
 	    class,
 	    ability_scores
+	}
+    }
+
+    pub fn gen() -> Character {
+	let mut name_generator = Generator::default();
+	let gen_name = name_generator.next().unwrap();
+	let mut rng = rand::thread_rng();
+	
+	Character {
+	    name: gen_name,
+	    species: rng.gen_range(1..=4).try_into().unwrap(),
+	    class: rng.gen_range(1..=4).try_into().unwrap(),
+	    ability_scores: AbilityScores {
+		str: Self::ability_score_dicepool().roll_and_sum().2 as i64,
+		dex: Self::ability_score_dicepool().roll_and_sum().2 as i64,
+		int: Self::ability_score_dicepool().roll_and_sum().2 as i64,
+		wis: Self::ability_score_dicepool().roll_and_sum().2 as i64,
+		cha: Self::ability_score_dicepool().roll_and_sum().2 as i64,
+		con: Self::ability_score_dicepool().roll_and_sum().2 as i64,
+	    }
 	}
     }
 }

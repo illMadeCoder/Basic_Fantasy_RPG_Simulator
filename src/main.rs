@@ -1,15 +1,14 @@
+#![allow(dead_code)]
+
 mod dice;
 mod character;
 mod dicepool;
 
-use dice::*;
-use dicepool::{DicePool, DicePoolError, DiceRollSum};
-use character::*;
+use dicepool::{DicePool, DiceRollSum};
+use character::{Character, AbilityScoreType};
 
 use std::io;
 use std::io::prelude::*;
-
-use names::Generator;
 
 fn pause() {
     let mut stdin = io::stdin();
@@ -55,68 +54,47 @@ fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
     dice_roll_sum.2 as AbilityScoreType
 }
 
-fn prompt_create_character() -> Character {
-    // TODO: potentially use reflection or something on a Skill type to prompt for each stat
-    let str_roll = prompt_character_stat_roll("Strength");
-    println!();
-    let dex_roll = prompt_character_stat_roll("Dexterity");
-    println!();
-    let int_roll = prompt_character_stat_roll("Intelligence");
-    println!();
-    let wis_roll = prompt_character_stat_roll("Wisdom");
-    println!();
-    let cha_roll = prompt_character_stat_roll("Charisma");
-    println!();
-    let con_roll = prompt_character_stat_roll("Charisma");
-    println!();
-    // choose a race
-    // minimum and maximum skills for races
-    // race powers
-    // choose a class
-    // your class must meet the prime requisite for you class
-    // magic user spells
-    // 0 xp
-    // xp to advance per class
-    // roll hit dice for class adding con
-    // roll starting money 3d6 * 10 gold
-    // purchase equipment
-    // determine ac
-    // determine attack bonus
-    // saving throws
-    // name character
-    Character {
-	name: String::from("hello"),
-	species: Species::Human,
-	class: Class::Fighter,	
-	ability_scores: AbilityScores {str: str_roll,
-				       dex: dex_roll,
-				       int: int_roll,
-				       wis: wis_roll,
-				       cha: cha_roll,
-				       con: con_roll}
-    }
-}
-
-fn auto_create_character() -> Character {
-    let mut name_generator = Generator::default();
-    let ability_score_dicepool = DicePool::new(3, Dice::D6);
-    let gen_name = name_generator.next().unwrap();
-    let dice = Dice::D4;
-    
-    Character {
-	name: gen_name,
-	species: dice.roll().try_into().unwrap(),
-	class: dice.roll().try_into().unwrap(),
-	ability_scores: AbilityScores {
-	    str: ability_score_dicepool.roll_and_sum().2 as i64,
-	    dex: ability_score_dicepool.roll_and_sum().2 as i64,
-	    int: ability_score_dicepool.roll_and_sum().2 as i64,
-	    wis: ability_score_dicepool.roll_and_sum().2 as i64,
-	    cha: ability_score_dicepool.roll_and_sum().2 as i64,
-	    con: ability_score_dicepool.roll_and_sum().2 as i64,	    
-	}
-    }
-}
+// fn prompt_create_character() -> Character {
+//     // TODO: potentially use reflection or something on a Skill type to prompt for each stat
+//     let str_roll = prompt_character_stat_roll("Strength");
+//     println!();
+//     let dex_roll = prompt_character_stat_roll("Dexterity");
+//     println!();
+//     let int_roll = prompt_character_stat_roll("Intelligence");
+//     println!();
+//     let wis_roll = prompt_character_stat_roll("Wisdom");
+//     println!();
+//     let cha_roll = prompt_character_stat_roll("Charisma");
+//     println!();
+//     let con_roll = prompt_character_stat_roll("Charisma");
+//     println!();
+//     // choose a race
+//     // minimum and maximum skills for races
+//     // race powers
+//     // choose a class
+//     // your class must meet the prime requisite for you class
+//     // magic user spells
+//     // 0 xp
+//     // xp to advance per class
+//     // roll hit dice for class adding con
+//     // roll starting money 3d6 * 10 gold
+//     // purchase equipment
+//     // determine ac
+//     // determine attack bonus
+//     // saving throws
+//     // name character
+//     // Character {
+//     // 	name: String::from("hello"),
+//     // 	species: Species::Human,
+//     // 	class: Class::Fighter,	
+//     // 	ability_scores: AbilityScores {str: str_roll,
+//     // 				       dex: dex_roll,
+//     // 				       int: int_roll,
+//     // 				       wis: wis_roll,
+//     // 				       cha: cha_roll,
+//     // 				       con: con_roll}
+//     // }
+// }
 
 // fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
 // }
@@ -132,7 +110,7 @@ fn main() {
 	// println!("rolling strength");
 	// println!("roll 3d6");
 	
-	println!("{:?}", auto_create_character())
+	println!("{:?}", Character::gen())
 	//pause();
 
 	// let stats_dicepool = DicePool::new(3,Dice::D6);
