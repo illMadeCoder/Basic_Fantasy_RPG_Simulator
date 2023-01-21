@@ -6,10 +6,9 @@ use rand::Rng;
 #[derive(Debug)]
 pub enum CharacterError {
     SpeciesError(u8),
-    ClassError(u8)
+    ClassError(u8),
+    RestrictionError,
 }
-
-struct Equipment {}
 
 #[derive(Debug)]
 pub enum Species {
@@ -38,46 +37,43 @@ impl Species {
 	rng.gen_range(0..=3).try_into().expect("Species::gen() failed out of range")
     }
     
-    fn restriction(&self, class: Class) -> bool {
-	match self {
-	    Species::Dwarf => match class {
-		Class::Cleric => false,
-		Class::Fighter => false,
-		Class::MagicUser => true,
-		Class::Thief => false
-	    },
-	    Species::Elf => match class {
-		Class::Cleric => false,
-		Class::Fighter => false,
+    fn valid_class(&self, class: &Class) -> bool {
+	match &self {
+	    Self::Dwarf => match class {
+		Class::Cleric => true,
+		Class::Fighter => true,
 		Class::MagicUser => false,
-		Class::Thief => false
+		Class::Thief => true
 	    },
-	    Species::Halfling => match class {
-		Class::Cleric => false,
-		Class::Fighter => false,
+	    Self::Elf => match class {
+		Class::Cleric => true,
+		Class::Fighter => true,
 		Class::MagicUser => true,
-		Class::Thief => false
+		Class::Thief => true
 	    },
-	    Species::Human => match class {
-		Class::Cleric => false,
-		Class::Fighter => false,
+	    Self::Halfling => match class {
+		Class::Cleric => true,
+		Class::Fighter => true,
 		Class::MagicUser => false,
-		Class::Thief => false
+		Class::Thief => true
+	    },
+	    Self::Human => match class {
+		Class::Cleric => true,
+		Class::Fighter => true,
+		Class::MagicUser => true,
+		Class::Thief => true
 	    },
 	}	
     }
-    // fn restrictions(&self, ability_scores: AbilityScores) -> bool {
-    // 	match &self {
-    // 	}
-    // }
-    // pub fn (&self, class: Class, ability_scores: Skills, equipment: Equipment) -> bool {
-    // 	match self {
-    // 	    Species::Dwarf => todo!(),
-    // 	    Species::Elf => todo!(),
-    // 	    Species::Halfling => todo!(),
-    // 	    Species::Human => todo!(),
-    // 	}
-    // }
+    
+    fn valid_ability_scores(&self, ability_scores: &AbilityScores) -> bool {
+	!match &self {
+	    Species::Dwarf => ability_scores.con >= 9 && ability_scores.cha <= 17,
+	    Species::Elf => ability_scores.int >= 9 && ability_scores.con <= 17,
+	    Species::Halfling => ability_scores.dex >= 9 && ability_scores.str <= 17,
+	    Species::Human => true,
+	}
+    }
 }
 
 #[derive(Debug)]
@@ -144,20 +140,23 @@ pub struct AbilityScores {
     pub cha: AbilityScoreType,
 }
 
-impl AbilityScores {
-    
+impl AbilityScores {    
     fn ability_score_dicepool() -> DicePool {
 	DicePool::new(3, Dice::D6)
+    }
+
+    fn gen_ability_score() -> AbilityScoreType {
+	Self::ability_score_dicepool().dice_roll_sum().2 as AbilityScoreType
     }
     
     fn gen() -> Self {	
 	AbilityScores {
-	    str: Self::ability_score_dicepool().dice_roll_sum().2 as AbilityScoreType,
-	    dex: Self::ability_score_dicepool().dice_roll_sum().2 as AbilityScoreType,
-	    int: Self::ability_score_dicepool().dice_roll_sum().2 as AbilityScoreType,
-	    wis: Self::ability_score_dicepool().dice_roll_sum().2 as AbilityScoreType,
-	    cha: Self::ability_score_dicepool().dice_roll_sum().2 as AbilityScoreType,
-	    con: Self::ability_score_dicepool().dice_roll_sum().2 as AbilityScoreType,
+	    str: Self::gen_ability_score(),
+	    dex: Self::gen_ability_score(),
+	    int: Self::gen_ability_score(),
+	    wis: Self::gen_ability_score(),
+	    cha: Self::gen_ability_score(),
+	    con: Self::gen_ability_score(),
 	}
     }
     
@@ -172,24 +171,35 @@ pub struct Character {
 }
 
 impl Character {    
-    pub fn new(name: String, species: Species, class: Class, ability_scores: AbilityScores) -> Self {
-	Self {
-	    name,
-	    species,
-	    class,
-	    ability_scores
+    pub fn new(name: String,
+	       species: Species,
+	       class: Class,
+	       ability_scores: AbilityScores) -> Result<Self, CharacterError> {
+	// put restrictions in the type system
+	if species.valid_class(&class) || species.valid_ability_scores(&ability_scores) {
+	    Ok(Self {
+		name,
+		species,
+		class,
+		ability_scores
+	    })
+
+	} else  {
+	    Err(CharacterError::RestrictionError)
 	}
     }
-
-    pub fn gen() -> Self {
+    
+    pub fn gen_name() -> String {
 	let mut name_generator = Generator::default();
-	let gen_name = name_generator.next().unwrap();
-	
-	Self {
-	    name: gen_name,
-	    species: Species::gen(),
-	    class: Class::gen(),
-	    ability_scores: AbilityScores::gen()
+	name_generator.next().unwrap()
+    }
+    
+    pub fn gen() -> Self {
+	loop {
+	    match Self::new(Self::gen_name(), Species::gen(), Class::gen(), AbilityScores::gen()) {
+		Ok(c) => break c,
+		Err(_) => {}
+	    }
 	}
     }
 }
