@@ -117,8 +117,8 @@ pub enum Ability {
 }
 
 impl Ability {
-    fn access(&self, ability_scores: AbilityScores) -> AbilityScoreType {
-	match &self {
+    fn access(self, ability_scores: AbilityScores) -> AbilityScoreType {
+	match self {
 	    Self::Str => ability_scores.str,
 	    Self::Int => ability_scores.int,
 	    Self::Wis => ability_scores.wis,
@@ -128,7 +128,7 @@ impl Ability {
 	}
     }
 
-    fn modifier(&self, ability_scores: AbilityScores) -> i32 {
+    fn modifier(self, ability_scores: AbilityScores) -> i32 {
 	match self.access(ability_scores) {
 	    x if x <= 3 => -3,
 	    x if x <= 5 => -2,
@@ -175,26 +175,31 @@ impl AbilityScores {
     
 }
 
+type MoneyType = i32;
+
 #[derive(Debug)]
 pub struct Character {
     pub name: String,
     pub ancestry: Ancestry,
     pub class: Class,
-    pub ability_scores: AbilityScores
+    pub ability_scores: AbilityScores,
+    pub money: MoneyType
 }
 
 impl Character {    
     pub fn new(name: String,
 	       ancestry: Ancestry,
 	       class: Class,
-	       ability_scores: AbilityScores) -> Result<Self, CharacterError> {
+	       ability_scores: AbilityScores,
+	       money: MoneyType) -> Result<Self, CharacterError> {
 	// put restrictions in the type system
 	if ancestry.valid_class(&class) && ancestry.valid_ability_scores(&ability_scores) {
 	    Ok(Self {
 		name,
 		ancestry,
 		class,
-		ability_scores
+		ability_scores,
+		money
 	    })
 
 	} else  {
@@ -206,10 +211,14 @@ impl Character {
 	let mut name_generator = Generator::default();
 	name_generator.next().unwrap()
     }
+
+    pub fn gen_money() -> MoneyType {
+	DicePool::new(3, Dice::D6).dice_roll_sum().2 as MoneyType * 10
+    }
     
     pub fn gen() -> Self {
 	loop {
-	    match Self::new(Self::gen_name(), Ancestry::gen(), Class::gen(), AbilityScores::gen()) {
+	    match Self::new(Self::gen_name(), Ancestry::gen(), Class::gen(), AbilityScores::gen(), Self::gen_money()) {
 		Ok(c) => break c,
 		Err(_) => ()
 	    }
