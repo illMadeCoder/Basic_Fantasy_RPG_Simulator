@@ -127,6 +127,19 @@ impl Ability {
 	    Self::Cha => ability_scores.cha
 	}
     }
+
+    fn modifier(&self, ability_scores: AbilityScores) -> i32 {
+	match self.access(ability_scores) {
+	    x if x <= 3 => -3,
+	    x if x <= 5 => -2,
+	    x if x <= 8 => -1,
+	    x if x <= 12 => 0,
+	    x if x <= 15 => 1,
+	    x if x <= 17 => 2,
+	    x if x >= 18 => 3,
+	    _ => 0
+	}
+    }
 }
 
 
