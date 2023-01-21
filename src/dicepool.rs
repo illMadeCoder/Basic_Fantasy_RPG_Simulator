@@ -63,7 +63,7 @@ impl DicePool {
 	self.0.iter().map(|&x| x.roll()).collect()
     }
     
-    pub fn roll_and_sum(&self) -> DiceRollSum {
+    pub fn dice_roll_sum(&self) -> DiceRollSum {
 	let dice = self.0.clone();
 	let roll = self.roll();
 	let sum = roll.iter().cloned().map(u32::from).sum();
@@ -101,7 +101,7 @@ mod test {
     #[test]
     fn parse_dicepool_roll_and_sum() {
 	let dicepool = DicePool::new(3, Dice::D8);
-	let subject = dicepool.roll_and_sum();
+	let subject = dicepool.dice_roll_sum();
 	assert!(subject.2 == 24);
     }
 

@@ -41,7 +41,7 @@ fn roll_dicepool_prompt(opt_mandatory_roll: Option<&str>) -> DiceRollSum {
 
 	let dicepool_parse = input.trim().parse::<DicePool>();
 	match dicepool_parse {
-	    Ok(dicepool) => return dicepool.roll_and_sum(),
+	    Ok(dicepool) => return dicepool.dice_roll_sum(),
 	    Err(_) => println!("Poorly formed dice roll input. Try again with the form: XdY where X and Y are unsigned whole numbers")
 	}
     }
