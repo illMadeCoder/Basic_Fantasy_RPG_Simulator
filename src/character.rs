@@ -177,13 +177,19 @@ impl AbilityScores {
 
 type MoneyType = i32;
 
+type LevelType = u8;
+
+type ExpType = u32;
+
 #[derive(Debug)]
 pub struct Character {
     pub name: String,
     pub ancestry: Ancestry,
     pub class: Class,
     pub ability_scores: AbilityScores,
-    pub money: MoneyType
+    pub money: MoneyType,
+    pub level: LevelType,
+    pub exp: ExpType    
 }
 
 impl Character {    
@@ -199,7 +205,9 @@ impl Character {
 		ancestry,
 		class,
 		ability_scores,
-		money
+		money,
+		level: 1,
+		exp: 0
 	    })
 
 	} else  {
