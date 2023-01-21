@@ -3,12 +3,15 @@
 mod dice;
 mod character;
 mod dicepool;
+mod equipment;
 
 use dicepool::{DicePool, DiceRollSum};
 use character::{Character, AbilityScoreType};
+use equipment::Equipment;
 
 use std::io;
 use std::io::prelude::*;
+
 
 fn pause() {
     let mut stdin = io::stdin();
