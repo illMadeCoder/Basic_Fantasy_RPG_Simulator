@@ -5,20 +5,20 @@ use rand::Rng;
 
 #[derive(Debug)]
 pub enum CharacterError {
-    SpeciesError(u8),
+    AncestryError(u8),
     ClassError(u8),
     RestrictionError,
 }
 
-#[derive(Debug)]
-pub enum Species {
+#[derive(Debug, PartialEq)]
+pub enum Ancestry {
     Dwarf,
     Elf,       
     Halfling,
     Human
 }
 
-impl TryFrom<u8> for Species {
+impl TryFrom<u8> for Ancestry {
     type Error = CharacterError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
 	match value {
@@ -26,15 +26,15 @@ impl TryFrom<u8> for Species {
 	    x if x == Self::Elf as u8 => Ok(Self::Elf),
 	    x if x == Self::Halfling as u8 => Ok(Self::Halfling),
 	    x if x == Self::Human as u8 => Ok(Self::Human),
-	    x => Err(CharacterError::SpeciesError(x))
+	    x => Err(CharacterError::AncestryError(x))
 	}
     }
 }
 
-impl Species {
-    fn gen() -> Species {
+impl Ancestry {
+    fn gen() -> Ancestry {
 	let mut rng = rand::thread_rng();
-	rng.gen_range(0..=3).try_into().expect("Species::gen() failed out of range")
+	rng.gen_range(0..=3).try_into().expect("Ancestry::gen() failed out of range")
     }
     
     fn valid_class(&self, class: &Class) -> bool {
@@ -67,16 +67,16 @@ impl Species {
     }
     
     fn valid_ability_scores(&self, ability_scores: &AbilityScores) -> bool {
-	!match &self {
-	    Species::Dwarf => ability_scores.con >= 9 && ability_scores.cha <= 17,
-	    Species::Elf => ability_scores.int >= 9 && ability_scores.con <= 17,
-	    Species::Halfling => ability_scores.dex >= 9 && ability_scores.str <= 17,
-	    Species::Human => true,
+	match &self {
+	    Ancestry::Dwarf => ability_scores.con >= 9 && ability_scores.cha <= 17,
+	    Ancestry::Elf => ability_scores.int >= 9 && ability_scores.con <= 17,
+	    Ancestry::Halfling => ability_scores.dex >= 9 && ability_scores.str <= 17,
+	    Ancestry::Human => true,
 	}
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Class {
     Cleric,
     Fighter,       
@@ -165,21 +165,21 @@ impl AbilityScores {
 #[derive(Debug)]
 pub struct Character {
     pub name: String,
-    pub species: Species,
+    pub ancestry: Ancestry,
     pub class: Class,
     pub ability_scores: AbilityScores
 }
 
 impl Character {    
     pub fn new(name: String,
-	       species: Species,
+	       ancestry: Ancestry,
 	       class: Class,
 	       ability_scores: AbilityScores) -> Result<Self, CharacterError> {
 	// put restrictions in the type system
-	if species.valid_class(&class) || species.valid_ability_scores(&ability_scores) {
+	if ancestry.valid_class(&class) && ancestry.valid_ability_scores(&ability_scores) {
 	    Ok(Self {
 		name,
-		species,
+		ancestry,
 		class,
 		ability_scores
 	    })
@@ -196,9 +196,33 @@ impl Character {
     
     pub fn gen() -> Self {
 	loop {
-	    match Self::new(Self::gen_name(), Species::gen(), Class::gen(), AbilityScores::gen()) {
+	    match Self::new(Self::gen_name(), Ancestry::gen(), Class::gen(), AbilityScores::gen()) {
 		Ok(c) => break c,
-		Err(_) => {}
+		Err(_) => ()
+	    }
+	}
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn lots_of_chars_restrictions_class() {
+	for _ in 0..100 {
+	    let c = Character::gen();
+	    if c.ancestry == Ancestry::Dwarf {
+		assert!(c.class != Class::Thief)
+	    }		
+	}
+    }
+
+    #[test]
+    fn lots_of_chars_restrictions_abilities() {
+	for _ in 0..100 {
+	    let c = Character::gen();
+	    if c.ancestry == Ancestry::Dwarf {
+		assert!(c.ability_scores.con >= 8)		
 	    }
 	}
     }

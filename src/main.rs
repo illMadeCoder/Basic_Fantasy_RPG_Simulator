@@ -110,7 +110,7 @@ fn main() {
 	// println!("rolling strength");
 	// println!("roll 3d6");
 	
-	println!("{:?}", Character::gen())
+	println!("{:#?}", Character::gen())
 	//pause();
 
 	// let stats_dicepool = DicePool::new(3,Dice::D6);
