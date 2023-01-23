@@ -1,5 +1,4 @@
 pub enum Equipment {
-    Sword
+    Longsword
 }
-
 

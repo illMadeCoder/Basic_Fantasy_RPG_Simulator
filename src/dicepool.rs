@@ -52,7 +52,12 @@ impl TryFrom<Vec<DiceNumType>> for DicePool {
     }
 }
 
-pub type DiceRollSum = (Vec<Dice>, Vec<u8>, u32);
+#[derive(Debug)]
+pub struct DiceRollSum {
+    pub dice: Vec<Dice>,
+    pub roll: Vec<u8>,
+    pub sum: u32
+}
 
 impl DicePool {
     pub fn new(quantity : usize , dice: Dice) -> DicePool {
@@ -67,7 +72,7 @@ impl DicePool {
 	let dice = self.0.clone();
 	let roll = self.roll();
 	let sum = roll.iter().cloned().map(u32::from).sum();
-	(dice, roll, sum)
+	DiceRollSum {dice, roll, sum}
     }
 }
 
@@ -102,7 +107,7 @@ mod test {
     fn parse_dicepool_roll_and_sum() {
 	let dicepool = DicePool::new(3, Dice::D8);
 	let subject = dicepool.dice_roll_sum();
-	assert!(subject.2 == 24);
+	assert!(subject.sum == 24);
     }
 
     #[test]

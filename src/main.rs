@@ -6,7 +6,7 @@ mod dicepool;
 mod equipment;
 
 use dicepool::{DicePool, DiceRollSum};
-use character::{Character, AbilityScoreType};
+use character::{Character, AbilityScore};
 use equipment::Equipment;
 
 use std::io;
@@ -50,11 +50,11 @@ fn roll_dicepool_prompt(opt_mandatory_roll: Option<&str>) -> DiceRollSum {
     }
 }
 
-fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
+fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScore {
     println!("Roll 3d6 for {}:", prompt_stat_name);
     let dice_roll_sum = roll_dicepool_prompt(Some("3d6"));
     println!("{:?}", dice_roll_sum);
-    dice_roll_sum.2 as AbilityScoreType
+    dice_roll_sum.sum as AbilityScore
 }
 
 // fn prompt_create_character() -> Character {
