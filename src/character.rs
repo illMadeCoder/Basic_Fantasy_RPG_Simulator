@@ -33,7 +33,7 @@ impl TryFrom<u8> for Ancestry {
 }
 
 impl Ancestry {
-    fn gen() -> Ancestry {
+    fn gen(ability_scores : &AbilityScores) -> Ancestry {
 	let mut rng = rand::thread_rng();
 	//valid_abilities(ability_scores);
 	rng.gen_range(0..=ANCESTRY_VARIANT_COUNT-1).try_into().expect("Ancestry::gen() failed out of range")
@@ -77,21 +77,21 @@ impl Ancestry {
 	    self.valid_ability_score(&ability_scores.wis)
     }
 
-    fn valid_ability_score(&self, ability: &Ability) -> bool {
+    fn valid_ability_score(&self, ability_score: &AbilityScore) -> bool {
 	match self {
-	    Ancestry::Dwarf => match *ability {
-		Ability::Con(v) => v >= 9,
-		Ability::Cha(v) => v <= 17,
+	    Ancestry::Dwarf => match ability_score.0 {
+		Ability::Con => ability_score.1 >= 9,
+		Ability::Cha => ability_score.1 <= 17,
 		_ => true
 	    },
-	    Ancestry::Elf => match *ability {		
-		Ability::Int(v) => v >= 9,
-		Ability::Con(v) => v <= 17,
+	    Ancestry::Elf => match ability_score.0  {		
+		Ability::Int => ability_score.1 >= 9,
+		Ability::Con => ability_score.1 <= 17,
 		_ => true
 	    },
-	    Ancestry::Halfling => match *ability {
-		Ability::Dex(v) => v >= 9,
-		Ability::Str(v) => v <= 17,
+	    Ancestry::Halfling => match ability_score.0 {
+		Ability::Dex => ability_score.1 >= 9,
+		Ability::Str => ability_score.1 <= 17,
 		_ => true
 	    },
 	    Ancestry::Human => true
@@ -109,7 +109,15 @@ pub enum Class {
 const CLASS_VARIANT_COUNT : u8 = 4;
 
 impl Class {
-    fn gen() -> Self {
+    fn prime_requisite(class : Class) -> Ability {
+	match class {
+	    Class::Cleric => Ability::Wis,
+	    Class::Fighter => Ability::Str,
+	    Class::MagicUser => Ability::Int,
+	    Class::Thief => Ability::Dex,
+	}
+    }
+    fn gen(ability_scores : &AbilityScores) -> Self {	
     	let mut rng = rand::thread_rng();
 	rng.gen_range(0..=CLASS_VARIANT_COUNT-1).try_into().unwrap()
     } 
@@ -128,55 +136,45 @@ impl TryFrom<u8> for Class {
     }
 }
 
-pub type AbilityScore = i32;
-
 pub type HpType = i32;
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub enum Ability {
-    Str(AbilityScore),
-    Int(AbilityScore),
-    Wis(AbilityScore),
-    Dex(AbilityScore),
-    Con(AbilityScore),
-    Cha(AbilityScore)
+    Str,
+    Int,
+    Wis,
+    Dex,
+    Con,
+    Cha
 }
 
-impl Ability {
-    fn get(&self) -> AbilityScore {
-	match *self {
-	    Self::Str (v) => v,
-	    Self::Int (v) => v,
-	    Self::Wis (v) => v,
-	    Self::Dex (v) => v,
-	    Self::Con (v) => v,
-	    Self::Cha (v) => v,
-	}
-    }    
+#[derive(Debug)]
+pub struct AbilityScore (Ability, i32);
 
-    // fn modifier(self, ability_scores: AbilityScores) -> i32 {
-    // 	match self.access(ability_scores) {
-    // 	    x if x <= 3 => -3,
-    // 	    x if x <= 5 => -2,
-    // 	    x if x <= 8 => -1,
-    // 	    x if x <= 12 => 0,
-    // 	    x if x <= 15 => 1,
-    // 	    x if x <= 17 => 2,
-    // 	    x if x >= 18 => 3,
-    // 	    _ => 0
-    // 	}
-    // }
+impl AbilityScore {
+    fn modifier(self) -> i32 {
+	match self.1 {
+	    x if x <= 3 => -3,
+	    x if x <= 5 => -2,
+	    x if x <= 8 => -1,
+	    x if x <= 12 => 0,
+	    x if x <= 15 => 1,
+	    x if x <= 17 => 2,
+	    x if x >= 18 => 3,
+	    _ => 0
+	}
+    }
 }
 
 
 #[derive(Debug)]
 pub struct AbilityScores {
-    pub str: Ability,
-    pub int: Ability,
-    pub wis: Ability,
-    pub dex: Ability,
-    pub con: Ability,
-    pub cha: Ability,
+    pub str: AbilityScore,
+    pub int: AbilityScore,
+    pub wis: AbilityScore,
+    pub dex: AbilityScore,
+    pub con: AbilityScore,
+    pub cha: AbilityScore,
 }
 
 impl AbilityScores {    
@@ -184,22 +182,22 @@ impl AbilityScores {
 	DicePool::new(3, Dice::D6)
     }
 
-    fn gen_ability_score() -> AbilityScore {	
-	Self::ability_score_dicepool().dice_roll_sum().sum as AbilityScore
+    fn gen_score() -> i32 {
+	Self::ability_score_dicepool().dice_roll_sum().sum as i32
     }
     
-    fn gen(ancestry: &Ancestry) -> Self {
+    fn gen() -> Self {
 	// array of 6
-	let rolls = Self::gen_ability_score();
+	let rolls = Self::gen_score();
 	// determine what best fits class
 	// randomly choose a race that meets requirement
 	AbilityScores {
-	    str: Ability::Str(Self::gen_ability_score()),
-	    dex: Ability::Dex(Self::gen_ability_score()),
-	    int: Ability::Int(Self::gen_ability_score()),
-	    wis: Ability::Wis(Self::gen_ability_score()),
-	    cha: Ability::Cha(Self::gen_ability_score()),
-	    con: Ability::Con(Self::gen_ability_score()),
+	    str: AbilityScore (Ability::Str, Self::gen_score()),
+	    dex: AbilityScore (Ability::Dex, Self::gen_score()),
+	    int: AbilityScore (Ability::Int, Self::gen_score()),
+	    wis: AbilityScore (Ability::Wis, Self::gen_score()),
+	    cha: AbilityScore (Ability::Cha, Self::gen_score()),
+	    con: AbilityScore (Ability::Con, Self::gen_score())
 	}
     }
  }
@@ -256,9 +254,9 @@ impl Character {
     pub fn gen() -> Self {
 	loop {
 	    let name = Self::gen_name();
-	    let ancestry = Ancestry::gen();
-	    let ability_scores = AbilityScores::gen(&ancestry);
-	    let class = Class::gen();
+	    let ability_scores = AbilityScores::gen();
+	    let ancestry = Ancestry::gen(&ability_scores);
+	    let class = Class::gen(&ability_scores);
 	    let money = Self::gen_money();
 	    match Self::new(name, ancestry, class, ability_scores, money) {
 		Ok(c) => break c,
@@ -286,7 +284,7 @@ mod test {
 	for _ in 0..100 {
 	    let c = Character::gen();
 	    if c.ancestry == Ancestry::Dwarf {
-		assert!(c.ability_scores.con.get() >= 8)		
+		assert!(c.ability_scores.con.1 >= 8)		
 	    }
 	}
     }

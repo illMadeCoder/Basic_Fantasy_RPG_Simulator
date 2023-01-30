@@ -1,13 +1,11 @@
 #![allow(dead_code)]
 
+use crate::dicepool::{DicePool, DiceRollSum};
+use character::{Character, AbilityScore};
+
 mod dice;
 mod character;
 mod dicepool;
-mod equipment;
-
-use dicepool::{DicePool, DiceRollSum};
-use character::{Character, AbilityScore};
-use equipment::Equipment;
 
 use std::io;
 use std::io::prelude::*;
@@ -50,11 +48,11 @@ fn roll_dicepool_prompt(opt_mandatory_roll: Option<&str>) -> DiceRollSum {
     }
 }
 
-fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScore {
+fn prompt_character_stat_roll(prompt_stat_name : &str) -> i32 {
     println!("Roll 3d6 for {}:", prompt_stat_name);
     let dice_roll_sum = roll_dicepool_prompt(Some("3d6"));
     println!("{:?}", dice_roll_sum);
-    dice_roll_sum.sum as AbilityScore
+    dice_roll_sum.sum as i32
 }
 
 // fn prompt_create_character() -> Character {
