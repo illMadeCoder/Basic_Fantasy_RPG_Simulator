@@ -113,12 +113,7 @@ mod test {
     #[test]
     fn parse_dicepool_parse_int_error() {
 	assert!("ad8".parse::<DicePool>().is_err())
-    }
-
-    // #[test]
-    // fn vec_dicepool_from_dicenumtype_ok() {
-    // 	let subject = DicePool::try_from(vec!([1, 2, 3]));
-    // }
+    }    
 }
 
 

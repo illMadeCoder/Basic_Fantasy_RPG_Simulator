@@ -1,12 +1,17 @@
 #![allow(dead_code)]
 
-use crate::dicepool::{DicePool, DiceRollSum};
-use character::{Character, AbilityScore};
-
 mod dice;
-mod character;
 mod dicepool;
+mod ability;
+mod ability_score;
+mod ancestry;
+mod ability_scores;
+mod class;
+mod character;
+mod character_error;
 
+use crate::dicepool::{DicePool, DiceRollSum};
+use character::{Character};
 use std::io;
 use std::io::prelude::*;
 
