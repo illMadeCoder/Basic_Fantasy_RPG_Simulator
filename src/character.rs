@@ -7,8 +7,8 @@ use crate::class::Class;
 
 use names::Generator;
 
-pub type MoneyType = i32;
-pub type LevelType = u8;
+pub type Money = i32;
+pub type Level = u8;
 pub type ExpType = u32;
 pub type HpType = i32;
 
@@ -18,9 +18,9 @@ pub struct Character {
     pub ancestry: Ancestry,
     pub class: Class,
     pub ability_score_set: AbilityScoreSet,
-    pub money: MoneyType,
-    pub level: LevelType,
-    pub exp: ExpType    
+    pub money: Money,
+    pub level: Level,
+    pub exp: ExpType
 }
 
 impl Character {    
@@ -28,7 +28,7 @@ impl Character {
 	       ancestry: Ancestry,
 	       class: Class,
 	       ability_score_set: AbilityScoreSet,
-	       money: MoneyType) -> Result<Self, CharacterError> {
+	       money: Money) -> Result<Self, CharacterError> {
 	if Character::is_valid(&ability_score_set, &ancestry, &class) {
 	    Ok(Character {
 		name,
@@ -61,8 +61,8 @@ impl Character {
 	name_generator.next().unwrap()
     }
 
-    fn gen_money() -> MoneyType {
-	DicePool::new(3, Dice::D6).dice_roll_sum().sum as MoneyType * 10
+    fn gen_money() -> Money {
+	DicePool::new(3, Dice::D6).dice_roll_sum().sum as Money * 10
     }
     
     pub fn gen() -> Self {
