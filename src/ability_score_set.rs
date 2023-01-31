@@ -32,7 +32,7 @@ impl AbilityScoreSet {
 	[self.str, self.int, self.wis, self.dex, self.con, self.cha]
     }
 
-    pub fn get(self, ability : Ability) -> Score {
+    pub fn get(&self, ability : Ability) -> Score {
 	match ability {
 	    Ability::Str => self.str.1,
 	    Ability::Int => self.int.1,

@@ -1,6 +1,6 @@
 use crate::dicepool::DicePool;
 use crate::dice::Dice;
-use crate::ability_scores::AbilityScores;
+use crate::ability_score_set::AbilityScoreSet;
 use crate::ancestry::Ancestry;
 use crate::character_error::CharacterError;
 use crate::class::Class;
@@ -17,7 +17,7 @@ pub struct Character {
     pub name: String,
     pub ancestry: Ancestry,
     pub class: Class,
-    pub ability_scores: AbilityScores,
+    pub ability_score_set: AbilityScoreSet,
     pub money: MoneyType,
     pub level: LevelType,
     pub exp: ExpType    
@@ -27,27 +27,33 @@ impl Character {
     pub fn new(name: String,
 	       ancestry: Ancestry,
 	       class: Class,
-	       ability_scores: AbilityScores,
+	       ability_score_set: AbilityScoreSet,
 	       money: MoneyType) -> Result<Self, CharacterError> {
-	// put restrictions in the type system
-	let character = Character {
-	    name,
-	    ancestry,
-	    class,
-	    ability_scores,
-	    money,
-	    level: 1,
-	    exp: 0
-	};
-	if character.is_valid() {
-	    Ok(character)
+	if Character::is_valid(&ability_score_set, &ancestry, &class) {
+	    Ok(Character {
+		name,
+		ancestry,
+		class,
+		ability_score_set,
+		money,
+		level: 1,
+		exp: 0
+	    })
 	} else  {
-	    Err(CharacterError::RestrictionError)
+	    Err(CharacterError::InvalidCharacterError)
 	}
     }
 
-    fn is_valid(&self) -> bool {
-	true
+    fn is_valid(ability_score_set: &AbilityScoreSet,
+		ancestry : &Ancestry,
+		class : &Class) -> bool {
+	let ancestry_supports_class = ancestry.supports_class(class);
+	let ancestry_supports_ability_score_set = ancestry.supports_ability_score_set(ability_score_set);	
+	let class_supports_ability_score_set = class.supports_ability_score_set(ability_score_set);
+
+	ancestry_supports_class &&
+	    ancestry_supports_ability_score_set &&
+	    class_supports_ability_score_set
     }
     
     fn gen_name() -> String {
@@ -62,11 +68,11 @@ impl Character {
     pub fn gen() -> Self {
 	loop {
 	    let name = Self::gen_name();
-	    let ability_scores = AbilityScores::gen();
+	    let ability_score_set = AbilityScoreSet::gen();
 	    let ancestry = Ancestry::gen();
 	    let class = Class::gen();
 	    let money = Self::gen_money();
-	    match Self::new(name, ancestry, class, ability_scores, money) {
+	    match Self::new(name, ancestry, class, ability_score_set, money) {
 		Ok(c) => break c,
 		Err(_) => ()
 	    }
@@ -92,7 +98,7 @@ mod test {
 	for _ in 0..100 {
 	    let c = Character::gen();
 	    if c.ancestry == Ancestry::Dwarf {
-		assert!(c.ability_scores.con.1 >= 8)		
+		assert!(c.ability_score_set.con.1 >= 8)		
 	    }
 	}
     }

@@ -1,8 +1,7 @@
 use rand::Rng;
 use crate::character_error::CharacterError;
 use crate::ability::Ability;
-use crate::ability_scores::AbilityScores;
-
+use crate::ability_score_set::AbilityScoreSet;
 
 #[derive(Debug, PartialEq)]
 pub enum Class {
@@ -14,7 +13,7 @@ pub enum Class {
 const CLASS_VARIANT_COUNT : u8 = 4;
 
 impl Class {
-    pub fn prime_requisite(self) -> Ability {
+    pub fn prime_requisite(&self) -> Ability {
 	match self {
 	    Class::Cleric => Ability::Wis,
 	    Class::Fighter => Ability::Str,
@@ -23,8 +22,8 @@ impl Class {
 	}
     }
 
-    fn valid(self, ability_scores : AbilityScores) -> bool {
-	ability_scores.get(self.prime_requisite()) >= 9
+    pub fn supports_ability_score_set(&self, ability_score_set : &AbilityScoreSet) -> bool {
+	ability_score_set.get(self.prime_requisite()) >= 9
     }
     
     pub fn gen() -> Self {

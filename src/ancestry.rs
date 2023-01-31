@@ -1,7 +1,7 @@
 use rand::Rng;
 use crate::ability_score::AbilityScore;
 use crate::character_error::CharacterError;
-use crate::ability_scores::AbilityScores;
+use crate::ability_score_set::AbilityScoreSet;
 use crate::class::Class;
 use crate::ability::Ability;
 
@@ -30,12 +30,12 @@ impl TryFrom<u8> for Ancestry {
 impl Ancestry {
     pub fn gen() -> Ancestry {
 	let mut rng = rand::thread_rng();
-	//valid_abilities(ability_scores);
+	//valid_abilities(ability_score_set);
 	rng.gen_range(0..=ANCESTRY_VARIANT_COUNT-1).try_into().expect("Ancestry::gen() failed out of range")
     }
     
-    pub fn valid_class(&self, class: &Class) -> bool {
-	match &self {
+    pub fn supports_class(&self, class : &Class) -> bool {
+	match self {
 	    Self::Dwarf => match class {
 		Class::Cleric => true,
 		Class::Fighter => true,
@@ -63,16 +63,16 @@ impl Ancestry {
 	}	
     }
 
-    pub fn valid_ability_scores(&self, ability_scores: &AbilityScores) -> bool {
-	self.valid_ability_score(&ability_scores.cha) &&
-	    self.valid_ability_score(&ability_scores.con) &&
-	    self.valid_ability_score(&ability_scores.dex) &&
-	    self.valid_ability_score(&ability_scores.int) &&
-	    self.valid_ability_score(&ability_scores.str) &&
-	    self.valid_ability_score(&ability_scores.wis)
+    pub fn supports_ability_score_set(&self, ability_score_set: &AbilityScoreSet) -> bool {
+	self.supports_ability_score(&ability_score_set.cha) &&
+	    self.supports_ability_score(&ability_score_set.con) &&
+	    self.supports_ability_score(&ability_score_set.dex) &&
+	    self.supports_ability_score(&ability_score_set.int) &&
+	    self.supports_ability_score(&ability_score_set.str) &&
+	    self.supports_ability_score(&ability_score_set.wis)
     }
 
-    pub fn valid_ability_score(&self, ability_score: &AbilityScore) -> bool {
+    fn supports_ability_score(&self, ability_score: &AbilityScore) -> bool {
 	match self {
 	    Ancestry::Dwarf => match ability_score.0 {
 		Ability::Con => ability_score.1 >= 9,

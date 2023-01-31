@@ -5,7 +5,7 @@ mod dicepool;
 mod ability;
 mod ability_score;
 mod ancestry;
-mod ability_scores;
+mod ability_score_set;
 mod class;
 mod character;
 mod character_error;
@@ -93,7 +93,7 @@ fn prompt_character_stat_roll(prompt_stat_name : &str) -> i32 {
 //     // 	name: String::from("hello"),
 //     // 	species: Species::Human,
 //     // 	class: Class::Fighter,	
-//     // 	ability_scores: AbilityScores {str: str_roll,
+//     // 	ability_score_set: AbilityScoreSet {str: str_roll,
 //     // 				       dex: dex_roll,
 //     // 				       int: int_roll,
 //     // 				       wis: wis_roll,
