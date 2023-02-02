@@ -5,5 +5,5 @@ pub enum Ability {
     Wis,
     Dex,
     Con,
-    Cha
+    Cha,
 }
