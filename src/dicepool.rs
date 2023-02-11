@@ -45,12 +45,13 @@ impl From<Vec<Dice>> for DicePool {
 impl TryFrom<Vec<DiceNumType>> for DicePool {
     type Error = DicePoolError;
 
-    fn try_from(dicepool: Vec<DiceNumType>) -> Result<Self, Self::Error> {
-        let r: Result<Vec<Dice>, DiceError> =
-            dicepool.into_iter().map(|x| Dice::try_from(x)).collect();
-        // TODO: remove intermediate step for v, if we ? at the end of collect() it requires type anno
-        let v = r?;
-        Ok(DicePool(v))
+    fn try_from(dicepool_vec: Vec<DiceNumType>) -> Result<Self, DicePoolError> {
+        Ok(DicePool(
+            dicepool_vec
+                .into_iter()
+                .map(Dice::try_from)
+                .collect::<Result<Vec<Dice>, DiceError>>()?,
+        ))
     }
 }
 
@@ -83,8 +84,8 @@ impl FromStr for DicePool {
 
     fn from_str(s: &str) -> Result<DicePool, Self::Err> {
         let (quantity_str, dice_str) = s
-            .split_once("d")
-            .ok_or(DicePoolError::DicePoolParseError(String::from(s)))?;
+            .split_once('d')
+            .ok_or_else(|| (DicePoolError::DicePoolParseError(String::from(s))))?;
         let quantity = quantity_str.parse::<usize>()?;
         let dice = dice_str.parse::<Dice>()?;
 

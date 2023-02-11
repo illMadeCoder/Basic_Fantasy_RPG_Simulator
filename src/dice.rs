@@ -26,7 +26,7 @@ impl From<ParseIntError> for DiceError {
     }
 }
 
-#[derive(PartialEq, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Dice {
     D4 = 4,
     D6 = 6,
