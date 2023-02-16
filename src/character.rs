@@ -4,14 +4,9 @@ use crate::character_error::CharacterError;
 use crate::class::Class;
 use crate::dice::Dice;
 use crate::dicepool::DicePool;
-use crate::item::Weapon;
+use crate::item::Item;
 
 use names::Generator;
-
-pub type Money = i32;
-pub type Level = u8;
-pub type ExpType = u32;
-pub type HpType = i32;
 
 #[derive(Debug)]
 pub struct Character {
@@ -19,13 +14,26 @@ pub struct Character {
     pub ancestry: Ancestry,
     pub class: Class,
     pub ability_score_set: AbilityScoreSet,
-    pub money: Money,
-    pub level: Level,
-    pub exp: ExpType,
-    pub weapon: Option<Weapon>,
+    pub money: i32,
+    pub level: u8,
+    pub exp: u32,
     pub ac: i32,
     pub hp: i32,
     pub max_hp: u32,
+}
+
+#[derive(Debug)]
+pub enum Hand {
+    OneHanded(Item),
+    DualHanded(Item, Item),
+    TwoHanded(Item),
+    None,
+}
+
+#[derive(Debug)]
+pub struct Equipment {
+    pub hand: Hand,
+    pub armor: Item,
 }
 
 impl Character {
@@ -34,7 +42,7 @@ impl Character {
         ancestry: Ancestry,
         class: Class,
         ability_score_set: AbilityScoreSet,
-        money: Money,
+        money: i32,
     ) -> Result<Self, CharacterError> {
         if Character::is_valid(&ability_score_set, &ancestry, &class) {
             Ok(Character {
@@ -45,8 +53,7 @@ impl Character {
                 money,
                 level: 1,
                 exp: 0,
-                weapon: None,
-                ac: 10,
+                ac: 0,
                 max_hp: 8,
                 hp: 8,
             })
@@ -71,8 +78,8 @@ impl Character {
         name_generator.next().unwrap()
     }
 
-    fn gen_money() -> Money {
-        DicePool::new(3, Dice::D6).dice_roll_sum().sum as Money * 10
+    fn gen_money() -> i32 {
+        DicePool::new(3, Dice::D6).dice_roll_sum().sum as i32 * 10
     }
 
     pub fn gen() -> Self {
