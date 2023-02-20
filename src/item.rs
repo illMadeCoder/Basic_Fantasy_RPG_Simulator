@@ -1,40 +1,64 @@
+use crate::action::Action;
 use crate::dicepool::DicePool;
-
-//use crate::dice::Dice;
-
-trait IntoItem {
-    fn name(&self) -> &str;
-    fn weight(&self) -> &f32;
-    fn price(&self) -> &i32;
-}
 
 #[derive(Debug)]
 pub struct Item {
     pub name: String,
-    pub weight: f32,
-    pub price: i32,
+    pub properties: Vec<ItemComponents>,
 }
 
 #[derive(Debug)]
-pub enum WeaponSize {
+pub enum MeleeWeaponSize {
     S,
     M,
     L,
 }
 
 #[derive(Debug)]
-pub struct Weapon {
-    pub item: Item,
-    pub size: WeaponSize,
-    pub damage: DicePool,
+pub struct MissileRange {
+    short: i32,
+    medium: i32,
+    long: i32,
 }
 
-// pub const SHORTSWORD : Weapon = Weapon {
-//     item: Item {
-// 	name: String::from("Sword"),
-// 	weight: 3.0,
-// 	price: 6
-//     },
-//     size: WeaponSize::S,
-//     damage: DicePool::new(1, Dice::D6)
-// };
+pub struct ItemAction {}
+
+#[derive(Debug)]
+pub enum ItemComponents {
+    MeleeWeapon {
+        damage: DicePool,
+        size: MeleeWeaponSize,
+    },
+    MissileWeapon {
+        damage: DicePool,
+        missile_range_mod: MissileRange,
+    },
+    Weight {
+        weight: f32,
+    },
+    Worth {
+        gold: i32,
+    },
+    Armor {
+        ac_base: i32,
+    },
+    Shield {
+        ac_mod: i32,
+    },
+}
+
+// impl ItemComponents {
+//     fn get_actions(&self) -> Vec<Action> {
+//         match self {
+//             ItemComponents::MeleeWeapon { damage, size } => vec![Action::MeleeAttack],
+//             ItemComponents::MissileWeapon {
+//                 damage,
+//                 missile_range_mod,
+//             } => vec![Action::MissileAttack],
+//             ItemComponents::Weight { weight } => todo!(),
+//             ItemComponents::Worth { gold } => todo!(),
+//             ItemComponents::Armor { ac_base } => todo!(),
+//             ItemComponents::Shield { ac_mod } => todo!(),
+//         }
+//     }
+// }

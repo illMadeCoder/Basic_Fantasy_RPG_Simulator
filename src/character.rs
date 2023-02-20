@@ -1,4 +1,5 @@
 use crate::ability_score_set::AbilityScoreSet;
+use crate::action::{Action, ActionResult, ActionType, Attackable, HasAC, HasHP, HasName};
 use crate::ancestry::Ancestry;
 use crate::character_error::CharacterError;
 use crate::class::Class;
@@ -17,9 +18,36 @@ pub struct Character {
     pub money: i32,
     pub level: u8,
     pub exp: u32,
-    pub ac: i32,
     pub hp: i32,
-    pub max_hp: u32,
+    pub ac: i32,
+    pub max_hp: i32,
+    pub equipment: Equipment,
+}
+
+impl HasName for Character {
+    fn name(&self) -> &str {
+        &self.name
+    }
+}
+
+impl HasAC for Character {
+    fn ac(&self) -> i32 {
+        self.ac
+    }
+}
+
+impl HasHP for Character {
+    fn get_hp(&self) -> i32 {
+        self.hp
+    }
+
+    fn get_max_hp(&self) -> i32 {
+        self.max_hp
+    }
+
+    fn set_hp(&mut self, x: i32) {
+        self.hp = x;
+    }
 }
 
 #[derive(Debug)]
@@ -33,7 +61,7 @@ pub enum Hand {
 #[derive(Debug)]
 pub struct Equipment {
     pub hand: Hand,
-    pub armor: Item,
+    pub armor: Option<Item>,
 }
 
 impl Character {
@@ -51,15 +79,42 @@ impl Character {
                 class,
                 ability_score_set,
                 money,
+                equipment: Equipment {
+                    hand: Hand::None,
+                    armor: None,
+                },
                 level: 1,
                 exp: 0,
-                ac: 0,
                 max_hp: 8,
                 hp: 8,
+                ac: 10,
             })
         } else {
             Err(CharacterError::InvalidCharacterError)
         }
+    }
+
+    pub fn next_action<'a>(&'a self, attackable: &'a mut dyn Attackable) -> Action {
+        let a = ActionType::MeleeAttack {
+            attack: DicePool::new(1, Dice::D20),
+            damage: DicePool::new(1, Dice::D8),
+            target: attackable,
+        };
+        Action::new(a)
+    }
+
+    pub fn take_turn(&self, attackable: &mut dyn Attackable) {
+        let mut action = self.next_action(attackable);
+        let action_result = action.invoke();
+        if let ActionResult::MeleeAttack {
+            hit,
+            attack_roll,
+            damage_roll,
+        } = action_result
+        {
+            println!("{0} attacks {1}", self.name(), attackable.name());
+            println!("{:?}", action_result);
+        };
     }
 
     fn is_valid(ability_score_set: &AbilityScoreSet, ancestry: &Ancestry, class: &Class) -> bool {
