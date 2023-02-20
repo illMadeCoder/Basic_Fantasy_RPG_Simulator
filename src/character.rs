@@ -1,5 +1,5 @@
 use crate::ability_score_set::AbilityScoreSet;
-use crate::action::{HasAC, HasHP, HasName};
+use crate::action::{AsPoint, HasAC, HasHP, HasName};
 use crate::agent::Agent;
 use crate::ancestry::Ancestry;
 use crate::character_error::CharacterError;
@@ -27,20 +27,31 @@ pub struct Character {
     pub position: Point,
 }
 
+impl AsPoint for Character {
+    fn as_point(&mut self) -> &mut Point {
+        &mut self.position
+    }
+}
+
 impl Agent for Character {
     fn next_action<'a>(
-        &self,
+        &'a mut self,
         attackable: &'a mut dyn crate::action::Attackable,
     ) -> crate::action::Action<'a> {
-        let a = crate::action::ActionType::MeleeAttack {
-            attack: DicePool::new(1, Dice::D20),
-            damage: DicePool::new(1, Dice::D8),
-            target: attackable,
+        // let a = crate::action::ActionType::MeleeAttack {
+        //     attack: DicePool::new(1, Dice::D20),
+        //     damage: DicePool::new(1, Dice::D8),
+        //     target: attackable,
+        // };
+
+        let a = crate::action::ActionType::Move {
+            target: self,
+            vector: Point { x: 0, y: -1 },
         };
         crate::action::Action::new(a)
     }
 
-    fn take_turn<'a>(&'a self, attackable: &'a mut dyn crate::action::Attackable) {
+    fn take_turn<'a>(&'a mut self, attackable: &'a mut dyn crate::action::Attackable) {
         let mut action = self.next_action(attackable);
         let action_result = action.invoke();
         println!("{0} attacks {1}", self.name(), attackable.name());

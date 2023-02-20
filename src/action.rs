@@ -1,4 +1,4 @@
-use crate::dicepool::DicePool;
+use crate::{dicepool::DicePool, point::Point};
 
 pub trait HasAC {
     fn ac(&self) -> i32;
@@ -45,6 +45,21 @@ impl<T: HasAC + HasHP + HasName> Attackable for T {
     }
 }
 
+pub trait AsPoint {
+    fn as_point(&mut self) -> &mut Point;
+}
+
+pub trait Moveable {
+    fn displace(&mut self, vector: Point);
+}
+
+impl<T: AsPoint> Moveable for T {
+    fn displace(&mut self, vector: Point) {
+        let p = self.as_point();
+        *p = *p + vector;
+    }
+}
+
 pub enum ActionType<'a> {
     MeleeAttack {
         attack: DicePool,
@@ -52,6 +67,10 @@ pub enum ActionType<'a> {
         target: &'a mut dyn Attackable,
     },
     MissileAttack,
+    Move {
+        target: &'a mut dyn Moveable,
+        vector: Point,
+    },
 }
 
 pub struct Action<'a> {
@@ -65,6 +84,8 @@ pub enum ActionResult {
         attack_roll: i32,
         damage_roll: i32,
     },
+    Move,
+    None,
 }
 
 impl Action<'_> {
@@ -96,6 +117,10 @@ impl Action<'_> {
                 }
             }
             ActionType::MissileAttack => todo!(),
+            ActionType::Move { target, vector } => {
+                target.displace(*vector);
+                ActionResult::Move
+            }
         }
     }
 }

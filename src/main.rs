@@ -122,23 +122,21 @@ pub struct Game {
     pub monster: Monster,
     pub width: i32,
     pub height: i32,
+    pub turn: i32,
 }
 
 impl Game {
     fn update(&mut self) {
-        let mut turn = 0;
-        while self.character.hp > 0 && self.monster.hp > 0 {
-            println!(
-                "\nturn {2} c: {0} e: {1}",
-                self.character.hp, self.monster.hp, turn
-            );
-            if turn % 2 == 0 {
-                self.character.take_turn(&mut self.monster);
-            } else {
-                self.monster.take_turn(&mut self.character);
-            }
-            turn += 1;
+        println!(
+            "\nturn {2} c: {0} e: {1}",
+            self.character.hp, self.monster.hp, self.turn
+        );
+        if self.turn % 2 == 0 {
+            self.character.take_turn(&mut self.monster);
+        } else {
+            self.monster.take_turn(&mut self.character);
         }
+        self.turn += 1;
 
         let winner: &str = if self.character.hp > 0 {
             &self.character.name
@@ -189,8 +187,11 @@ fn main() {
         monster,
         width: 10,
         height: 5,
+        turn: 0,
     };
 
-    game.update();
-    View::draw(&game);
+    while game.character.hp > 0 && game.monster.hp > 0 {
+        game.update();
+        View::draw(&game);
+    }
 }

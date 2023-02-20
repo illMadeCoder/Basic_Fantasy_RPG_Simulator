@@ -1,3 +1,4 @@
+use crate::action::AsPoint;
 use crate::agent::Agent;
 use crate::DicePool;
 use crate::HasAC;
@@ -14,6 +15,12 @@ pub struct Monster {
     pub max_hp: i32,
     pub hp: i32,
     pub position: Point,
+}
+
+impl AsPoint for Monster {
+    fn as_point(&mut self) -> &mut Point {
+        &mut self.position
+    }
 }
 
 impl Agent for Monster {}
