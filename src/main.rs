@@ -11,11 +11,13 @@ mod class;
 mod dice;
 mod dicepool;
 mod item;
+mod monster;
 
 use action::{Action, ActionResult, ActionType, Attackable, HasAC, HasHP, HasName};
 use character::Character;
 use dice::Dice;
 use dicepool::{DicePool, DiceRollSum};
+use monster::Monster;
 
 use std::io;
 use std::io::prelude::*;
@@ -111,79 +113,6 @@ fn prompt_character_stat_roll(prompt_stat_name: &str) -> i32 {
 // fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
 // }
 
-struct Monster {
-    name: String,
-    ac: i32,
-    hit_dice: u8,
-    no_of_attacks: u8,
-    damage: DicePool,
-    max_hp: i32,
-    hp: i32,
-}
-
-impl Monster {
-    pub fn next_action<'a>(&'a self, attackable: &'a mut dyn Attackable) -> Action {
-        let a = ActionType::MeleeAttack {
-            attack: DicePool::new(1, Dice::D20),
-            damage: DicePool::new(1, Dice::D8),
-            target: attackable,
-        };
-        Action::new(a)
-    }
-
-    pub fn take_turn(&self, attackable: &mut dyn Attackable) {
-        let mut action = self.next_action(attackable);
-        let action_result = action.invoke();
-        if let ActionResult::MeleeAttack {
-            hit,
-            attack_roll,
-            damage_roll,
-        } = action_result
-        {
-            println!("{0} attacks {1}", self.name(), attackable.name());
-            println!("{:?}", action_result);
-        };
-    }
-}
-
-impl HasAC for Monster {
-    fn ac(&self) -> i32 {
-        self.ac
-    }
-}
-
-impl HasHP for Monster {
-    fn get_hp(&self) -> i32 {
-        self.hp
-    }
-
-    fn get_max_hp(&self) -> i32 {
-        self.max_hp
-    }
-
-    fn set_hp(&mut self, x: i32) {
-        self.hp = x;
-    }
-}
-
-impl HasName for Monster {
-    fn name(&self) -> &str {
-        &self.name
-    }
-}
-
-// Goblin
-// Armor Class:	14 (11)
-// Hit Dice:	1-1
-// No. of Attacks:	1 weapon
-// Damage:	1d6 or by weapon
-// Movement:	20' Unarmored 30'
-// No. Appearing:	2d4 ,Wild 6d10, Lair 6d10
-// Save As:	Fighter: 1
-// Morale:	7 or see below
-// Treasure Type:	R each; C in lair
-// XP:	10
-
 fn main() {
     let mut character = Character::gen();
     println!("{:#?}", character);
@@ -216,43 +145,3 @@ fn main() {
     };
     println!("\n{0} won!", winner);
 }
-
-// fn attack_player(m: &Monster, c: &mut Character) {
-//     // attack monster
-//     let attack_dice_pool = DicePool::new(1, Dice::D20);
-//     println!("{0} attacks {1}", m.name, c.name);a
-
-//     let roll = attack_dice_pool.dice_roll_sum().sum;
-//     println!("{0} rolls {1} to attack against ac {2}", m.name, roll, 10);
-
-//     let hit = roll >= m.ac;
-//     let hit_or_miss_text = if hit { "hit" } else { "missed" };
-//     println!("{0} {1} {2}", m.name, hit_or_miss_text, c.name);
-
-//     if hit {
-//         let damage_dice = DicePool::new(1, Dice::D6);
-//         let damage_roll = damage_dice.dice_roll_sum().sum;
-//         c.hp -= damage_roll;
-//         println!("{0} takes {1} damage", c.name, damage_roll)
-//     }
-// }
-
-// fn attack_monster(c: &Character, m: &mut Monster) {
-//     // attack monster
-//     let attack_dice_pool = DicePool::new(1, Dice::D20);
-//     println!("{0} attacks {1}", c.name, m.name);
-
-//     let roll = attack_dice_pool.dice_roll_sum().sum;
-//     println!("{0} rolls {1} to attack against ac {2}", c.name, roll, m.ac);
-
-//     let hit = roll >= m.ac;
-//     let hit_or_miss_text = if hit { "hit" } else { "missed" };
-//     println!("{0} {1} {2}", m.name, hit_or_miss_text, c.name);
-
-//     if hit {
-//         let damage_dice = DicePool::new(1, Dice::D6);
-//         let damage_roll = damage_dice.dice_roll_sum().sum;
-//         m.hp -= damage_roll;
-//         println!("{0} takes {1} damage", m.name, damage_roll)
-//     }
-// }
