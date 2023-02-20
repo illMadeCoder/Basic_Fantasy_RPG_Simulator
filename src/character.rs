@@ -1,5 +1,5 @@
 use crate::ability_score_set::AbilityScoreSet;
-use crate::action::{Action, ActionType, Attackable, HasAC, HasHP, HasName};
+use crate::action::{HasAC, HasHP, HasName};
 use crate::agent::Agent;
 use crate::ancestry::Ancestry;
 use crate::character_error::CharacterError;
@@ -7,6 +7,7 @@ use crate::class::Class;
 use crate::dice::Dice;
 use crate::dicepool::DicePool;
 use crate::item::Item;
+use crate::point::Point;
 
 use names::Generator;
 
@@ -23,9 +24,29 @@ pub struct Character {
     pub ac: i32,
     pub max_hp: i32,
     pub equipment: Equipment,
+    pub position: Point,
 }
 
-impl Agent for Character {}
+impl Agent for Character {
+    fn next_action<'a>(
+        &self,
+        attackable: &'a mut dyn crate::action::Attackable,
+    ) -> crate::action::Action<'a> {
+        let a = crate::action::ActionType::MeleeAttack {
+            attack: DicePool::new(1, Dice::D20),
+            damage: DicePool::new(1, Dice::D8),
+            target: attackable,
+        };
+        crate::action::Action::new(a)
+    }
+
+    fn take_turn<'a>(&'a self, attackable: &'a mut dyn crate::action::Attackable) {
+        let mut action = self.next_action(attackable);
+        let action_result = action.invoke();
+        println!("{0} attacks {1}", self.name(), attackable.name());
+        println!("{:?}", action_result);
+    }
+}
 
 impl HasName for Character {
     fn name(&self) -> &str {
@@ -91,6 +112,7 @@ impl Character {
                 max_hp: 8,
                 hp: 8,
                 ac: 10,
+                position: Point { x: 3, y: 3 },
             })
         } else {
             Err(CharacterError::InvalidCharacterError)

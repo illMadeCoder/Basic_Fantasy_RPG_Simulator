@@ -13,6 +13,7 @@ mod dice;
 mod dicepool;
 mod item;
 mod monster;
+mod point;
 
 use action::{Action, ActionType, Attackable, HasAC, HasHP, HasName};
 use agent::Agent;
@@ -20,6 +21,7 @@ use character::Character;
 use dice::Dice;
 use dicepool::{DicePool, DiceRollSum};
 use monster::Monster;
+use point::Point;
 
 use std::io;
 use std::io::prelude::*;
@@ -115,11 +117,63 @@ fn prompt_character_stat_roll(prompt_stat_name: &str) -> i32 {
 // fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
 // }
 
+pub struct Game {
+    pub character: Character,
+    pub monster: Monster,
+    pub width: i32,
+    pub height: i32,
+}
+
+impl Game {
+    fn update(&mut self) {
+        let mut turn = 0;
+        while self.character.hp > 0 && self.monster.hp > 0 {
+            println!(
+                "\nturn {2} c: {0} e: {1}",
+                self.character.hp, self.monster.hp, turn
+            );
+            if turn % 2 == 0 {
+                self.character.take_turn(&mut self.monster);
+            } else {
+                self.monster.take_turn(&mut self.character);
+            }
+            turn += 1;
+        }
+
+        let winner: &str = if self.character.hp > 0 {
+            &self.character.name
+        } else {
+            &self.monster.name
+        };
+        println!("\n{0} won!", winner);
+    }
+}
+
+pub struct View {}
+
+impl View {
+    pub fn draw(game: &Game) {
+        for y in 0..game.height {
+            for x in 0..game.width {
+                let point = Point { x, y };
+                if game.character.position == point {
+                    print!("@")
+                } else if game.monster.position == point {
+                    print!("m");
+                } else {
+                    print!(".");
+                }
+            }
+            print!("\n");
+        }
+    }
+}
+
 fn main() {
     let mut character = Character::gen();
     println!("{:#?}", character);
 
-    let mut m = Monster {
+    let mut monster = Monster {
         name: "Goblin".to_string(),
         ac: 14,
         hit_dice: 1,
@@ -127,23 +181,16 @@ fn main() {
         damage: DicePool::new(1, Dice::D6),
         hp: 8,
         max_hp: 8,
+        position: Point { x: 4, y: 3 },
     };
 
-    let mut turn = 0;
-    while character.hp > 0 && m.hp > 0 {
-        println!("\nturn {2} c: {0} e: {1}", character.hp, m.hp, turn);
-        if turn % 2 == 0 {
-            character.take_turn(&mut m);
-        } else {
-            m.take_turn(&mut character);
-        }
-        turn += 1;
-    }
-
-    let winner = if character.hp > 0 {
-        character.name
-    } else {
-        m.name
+    let mut game = Game {
+        character,
+        monster,
+        width: 10,
+        height: 5,
     };
-    println!("\n{0} won!", winner);
+
+    game.update();
+    View::draw(&game);
 }

@@ -1,12 +1,9 @@
 use crate::agent::Agent;
-use crate::Action;
-use crate::ActionType;
-use crate::Attackable;
-use crate::Dice;
 use crate::DicePool;
 use crate::HasAC;
 use crate::HasHP;
 use crate::HasName;
+use crate::Point;
 
 pub struct Monster {
     pub name: String,
@@ -16,6 +13,7 @@ pub struct Monster {
     pub damage: DicePool,
     pub max_hp: i32,
     pub hp: i32,
+    pub position: Point,
 }
 
 impl Agent for Monster {}
