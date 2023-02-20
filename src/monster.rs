@@ -1,3 +1,4 @@
+use crate::agent::Agent;
 use crate::Action;
 use crate::ActionType;
 use crate::Attackable;
@@ -17,23 +18,7 @@ pub struct Monster {
     pub hp: i32,
 }
 
-impl Monster {
-    pub fn next_action<'a>(&'a self, attackable: &'a mut dyn Attackable) -> Action {
-        let a = ActionType::MeleeAttack {
-            attack: DicePool::new(1, Dice::D20),
-            damage: DicePool::new(1, Dice::D8),
-            target: attackable,
-        };
-        Action::new(a)
-    }
-
-    pub fn take_turn(&self, attackable: &mut dyn Attackable) {
-        let mut action = self.next_action(attackable);
-        let action_result = action.invoke();
-        println!("{0} attacks {1}", self.name(), attackable.name());
-        println!("{:?}", action_result);
-    }
-}
+impl Agent for Monster {}
 
 impl HasAC for Monster {
     fn ac(&self) -> i32 {

@@ -25,23 +25,7 @@ pub struct Character {
     pub equipment: Equipment,
 }
 
-impl Agent for Character {
-    fn next_action<'a>(&self, attackable: &'a mut dyn Attackable) -> Action<'a> {
-        let a = ActionType::MeleeAttack {
-            attack: DicePool::new(1, Dice::D20),
-            damage: DicePool::new(1, Dice::D8),
-            target: attackable,
-        };
-        Action::new(a)
-    }
-
-    fn take_turn(&self, attackable: &mut dyn Attackable) {
-        let mut action = self.next_action(attackable);
-        let action_result = action.invoke();
-        println!("{0} attacks {1}", self.name(), attackable.name());
-        println!("{:?}", action_result);
-    }
-}
+impl Agent for Character {}
 
 impl HasName for Character {
     fn name(&self) -> &str {
