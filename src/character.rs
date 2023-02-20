@@ -1,5 +1,6 @@
 use crate::ability_score_set::AbilityScoreSet;
-use crate::action::{Action, ActionResult, ActionType, Attackable, HasAC, HasHP, HasName};
+use crate::action::{Action, ActionType, Attackable, HasAC, HasHP, HasName};
+use crate::agent::Agent;
 use crate::ancestry::Ancestry;
 use crate::character_error::CharacterError;
 use crate::class::Class;
@@ -22,6 +23,24 @@ pub struct Character {
     pub ac: i32,
     pub max_hp: i32,
     pub equipment: Equipment,
+}
+
+impl Agent for Character {
+    fn next_action<'a>(&self, attackable: &'a mut dyn Attackable) -> Action<'a> {
+        let a = ActionType::MeleeAttack {
+            attack: DicePool::new(1, Dice::D20),
+            damage: DicePool::new(1, Dice::D8),
+            target: attackable,
+        };
+        Action::new(a)
+    }
+
+    fn take_turn(&self, attackable: &mut dyn Attackable) {
+        let mut action = self.next_action(attackable);
+        let action_result = action.invoke();
+        println!("{0} attacks {1}", self.name(), attackable.name());
+        println!("{:?}", action_result);
+    }
 }
 
 impl HasName for Character {
@@ -94,29 +113,6 @@ impl Character {
         }
     }
 
-    pub fn next_action<'a>(&'a self, attackable: &'a mut dyn Attackable) -> Action {
-        let a = ActionType::MeleeAttack {
-            attack: DicePool::new(1, Dice::D20),
-            damage: DicePool::new(1, Dice::D8),
-            target: attackable,
-        };
-        Action::new(a)
-    }
-
-    pub fn take_turn(&self, attackable: &mut dyn Attackable) {
-        let mut action = self.next_action(attackable);
-        let action_result = action.invoke();
-        if let ActionResult::MeleeAttack {
-            hit,
-            attack_roll,
-            damage_roll,
-        } = action_result
-        {
-            println!("{0} attacks {1}", self.name(), attackable.name());
-            println!("{:?}", action_result);
-        };
-    }
-
     fn is_valid(ability_score_set: &AbilityScoreSet, ancestry: &Ancestry, class: &Class) -> bool {
         let ancestry_supports_class = ancestry.supports_class(class);
         let ancestry_supports_ability_score_set =
@@ -144,9 +140,8 @@ impl Character {
             let ancestry = Ancestry::gen();
             let class = Class::gen();
             let money = Self::gen_money();
-            match Self::new(name, ancestry, class, ability_score_set, money) {
-                Ok(c) => break c,
-                Err(_) => (),
+            if let Ok(c) = Self::new(name, ancestry, class, ability_score_set, money) {
+                break c;
             }
         }
     }

@@ -4,6 +4,7 @@ mod ability;
 mod ability_score;
 mod ability_score_set;
 mod action;
+mod agent;
 mod ancestry;
 mod character;
 mod character_error;
@@ -13,7 +14,8 @@ mod dicepool;
 mod item;
 mod monster;
 
-use action::{Action, ActionResult, ActionType, Attackable, HasAC, HasHP, HasName};
+use action::{Action, ActionType, Attackable, HasAC, HasHP, HasName};
+use agent::Agent;
 use character::Character;
 use dice::Dice;
 use dicepool::{DicePool, DiceRollSum};

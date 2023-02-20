@@ -1,5 +1,4 @@
 use crate::Action;
-use crate::ActionResult;
 use crate::ActionType;
 use crate::Attackable;
 use crate::Dice;
@@ -31,15 +30,8 @@ impl Monster {
     pub fn take_turn(&self, attackable: &mut dyn Attackable) {
         let mut action = self.next_action(attackable);
         let action_result = action.invoke();
-        if let ActionResult::MeleeAttack {
-            hit,
-            attack_roll,
-            damage_roll,
-        } = action_result
-        {
-            println!("{0} attacks {1}", self.name(), attackable.name());
-            println!("{:?}", action_result);
-        };
+        println!("{0} attacks {1}", self.name(), attackable.name());
+        println!("{:?}", action_result);
     }
 }
 

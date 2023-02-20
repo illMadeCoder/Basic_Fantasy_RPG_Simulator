@@ -1,4 +1,3 @@
-use crate::action::Action;
 use crate::dicepool::DicePool;
 
 #[derive(Debug)]
