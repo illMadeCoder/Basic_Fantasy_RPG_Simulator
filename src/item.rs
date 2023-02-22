@@ -20,8 +20,6 @@ pub struct MissileRange {
     long: i32,
 }
 
-pub struct ItemAction {}
-
 #[derive(Debug)]
 pub enum ItemComponents {
     MeleeWeapon {
@@ -45,19 +43,3 @@ pub enum ItemComponents {
         ac_mod: i32,
     },
 }
-
-// impl ItemComponents {
-//     fn get_actions(&self) -> Vec<Action> {
-//         match self {
-//             ItemComponents::MeleeWeapon { damage, size } => vec![Action::MeleeAttack],
-//             ItemComponents::MissileWeapon {
-//                 damage,
-//                 missile_range_mod,
-//             } => vec![Action::MissileAttack],
-//             ItemComponents::Weight { weight } => todo!(),
-//             ItemComponents::Worth { gold } => todo!(),
-//             ItemComponents::Armor { ac_base } => todo!(),
-//             ItemComponents::Shield { ac_mod } => todo!(),
-//         }
-//     }
-// }

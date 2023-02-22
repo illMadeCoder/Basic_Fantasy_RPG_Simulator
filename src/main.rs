@@ -3,7 +3,7 @@
 mod ability;
 mod ability_score;
 mod ability_score_set;
-mod action;
+mod actor;
 mod agent;
 mod ancestry;
 mod character;
@@ -11,18 +11,21 @@ mod character_error;
 mod class;
 mod dice;
 mod dicepool;
+mod game_action;
 mod item;
 mod monster;
 mod point;
 
-use action::{Action, ActionType, Attackable, HasAC, HasHP, HasName};
+use actor::{Actor, Potential};
 use agent::Agent;
 use character::Character;
 use dice::Dice;
 use dicepool::{DicePool, DiceRollSum};
+use game_action::GameAction;
 use monster::Monster;
 use point::Point;
 
+use std::collections::HashSet;
 use std::io;
 use std::io::prelude::*;
 
@@ -117,81 +120,297 @@ fn prompt_character_stat_roll(prompt_stat_name: &str) -> i32 {
 // fn prompt_character_stat_roll(prompt_stat_name : &str) -> AbilityScoreType {
 // }
 
-pub struct Game {
-    pub character: Character,
-    pub monster: Monster,
-    pub width: i32,
-    pub height: i32,
-    pub turn: i32,
+// pub struct GameObject {
+//     String name,
+//     usize id,
+// }
+
+// enum GameObjectComponent {
+//     Attackable {  },
+//     Moveable { }
+// }
+
+// pub struct Game {
+//     pub game_objects: Vec<&dyn GameObject>,
+//     pub width: i32,
+//     pub height: i32,
+//     pub turn: i32,
+// }
+
+// impl Game {
+//     fn update(&mut self) {
+
+//         // for agent in agents
+//         // agent.get
+
+//         // println!(
+//         //     "\nturn {2} c: {0} e: {1}",
+//         //     self.character.hp, self.monster.hp, self.turn
+//         // );
+//         // if self.turn % 2 == 0 {
+//         //     self.character.take_turn(self);
+//         // } else {
+//         //     self.monster.take_turn(self);
+//         // }
+
+//         // self.turn += 1;
+
+//         // let winner: &str = if self.character.hp > 0 {
+//         //     &self.character.name
+//         // } else {
+//         //     &self.monster.name
+//         // };
+//         // println!("\n{0} won!", winner);
+//     }
+// }
+
+// pub struct View {}
+
+// impl View {
+//     pub fn draw(game: &Game) {
+//         for y in 0..game.height {
+//             for x in 0..game.width {
+//                 let point = Point { x, y };
+//                 // if game.character.position == point {
+//                 //     print!("@")
+//                 // } else if game.monster.position == point {
+//                 //     print!("m");
+//                 // } else {
+//                 //     print!(".");
+//                 // }
+//             }
+//             print!("\n");
+//         }
+//     }
+// }
+
+pub struct PrototypeAgent {
+    actor: usize,
 }
 
-impl Game {
-    fn update(&mut self) {
-        println!(
-            "\nturn {2} c: {0} e: {1}",
-            self.character.hp, self.monster.hp, self.turn
-        );
-        if self.turn % 2 == 0 {
-            self.character.take_turn(&mut self.monster);
+impl Agent for PrototypeAgent {
+    fn decide_action(&self, game: &Game) -> GameAction {
+        let character = game.get(self.actor);
+        let potential_set = character.potential_set();
+        if potential_set.contains(&Potential::Attack) {
+            GameAction::MeleeAttack {
+                target: *game.get_by_name("Goblin".to_string()).first().unwrap(),
+            }
         } else {
-            self.monster.take_turn(&mut self.character);
+            GameAction::None
         }
-        self.turn += 1;
-
-        let winner: &str = if self.character.hp > 0 {
-            &self.character.name
-        } else {
-            &self.monster.name
-        };
-        println!("\n{0} won!", winner);
     }
 }
 
-pub struct View {}
+impl Actor for Character {
+    fn potential_set(&self) -> HashSet<Potential> {
+        let mut set = HashSet::new();
+        set.insert(Potential::Attack);
+        set
+    }
+}
 
-impl View {
-    pub fn draw(game: &Game) {
-        for y in 0..game.height {
-            for x in 0..game.width {
-                let point = Point { x, y };
-                if game.character.position == point {
-                    print!("@")
-                } else if game.monster.position == point {
-                    print!("m");
-                } else {
-                    print!(".");
-                }
+impl Actor for Monster {
+    fn potential_set(&self) -> HashSet<Potential> {
+        let mut set = HashSet::new();
+        //set.insert(Potential::Attack);
+        set
+    }
+}
+
+// pub trait HasAC {
+//     fn ac(&self) -> i32;
+// }
+
+// pub trait HasHP {
+//     fn get_max_hp(&self) -> i32;
+//     fn get_hp(&self) -> i32;
+//     fn set_hp(&mut self, damage: i32);
+// }
+
+// pub trait Attackable {
+//     fn is_hit(&self, hit_roll: i32) -> bool;
+//     fn apply_damage(&mut self, damage: i32);
+//     fn attack(&mut self, hit_roll: i32, damage: i32) -> bool {
+//         if self.is_hit(hit_roll) {
+//             self.apply_damage(damage);
+//             return true;
+//         }
+//         false
+//     }
+// }
+
+// impl<T: HasAC + HasHP + GameObject> Attackable for T {
+//     fn is_hit(&self, hit_roll: i32) -> bool {
+//         hit_roll >= self.ac()
+//     }
+
+//     fn apply_damage(&mut self, damage: i32) {
+//         self.set_hp(self.get_hp() - damage)
+//     }
+
+//     fn attack(&mut self, hit_roll: i32, damage: i32) -> bool {
+//         if self.is_hit(hit_roll) {
+//             self.apply_damage(damage);
+//             true
+//         } else {
+//             false
+//         }
+//     }
+// }
+
+// pub trait AsPoint {
+//     fn as_point(&mut self) -> &mut Point;
+// }
+
+// pub trait Moveable {
+//     fn displace(&mut self, vector: Point);
+// }
+
+// impl<T: AsPoint> Moveable for T {
+//     fn displace(&mut self, vector: Point) {
+//         let p = self.as_point();
+//         *p = *p + vector;
+//     }
+// }
+
+// pub enum GameActionType<'a> {
+//     MeleeAttack {
+//         attack: DicePool,
+//         damage: DicePool,
+//         target: &'a dyn Attackable,
+//     },
+//     MissileAttack,
+//     Move {
+//         vector: Point,
+//         target: &'a dyn Moveable,
+//     },
+// }
+
+pub trait GameObject: Actor {
+    fn get_ac(&self) -> i32;
+    fn get_name(&self) -> &str;
+    fn take_damage(&mut self, damage: i32);
+    fn get_hp(&self) -> i32;
+}
+
+impl GameObject for Monster {
+    fn get_ac(&self) -> i32 {
+        10
+    }
+    fn get_name(&self) -> &str {
+        &self.name
+    }
+    fn take_damage(&mut self, damage: i32) {
+        self.hp -= damage;
+    }
+    fn get_hp(&self) -> i32 {
+        self.hp
+    }
+}
+
+impl GameObject for Character {
+    fn get_ac(&self) -> i32 {
+        10
+    }
+    fn get_name(&self) -> &str {
+        &self.name
+    }
+    fn take_damage(&mut self, damage: i32) {
+        self.hp -= damage;
+    }
+    fn get_hp(&self) -> i32 {
+        self.hp
+    }
+}
+
+struct Game<'a> {
+    game_objects: Vec<&'a mut dyn GameObject>,
+}
+
+impl<'a> Game<'a> {
+    fn new() -> Game<'a> {
+        Game {
+            game_objects: Vec::new(),
+        }
+    }
+
+    fn insert(&mut self, game_objects: &'a mut dyn GameObject) -> usize {
+        let i = self.game_objects.len();
+        self.game_objects.push(game_objects);
+        i
+    }
+
+    fn get(&self, id: usize) -> &dyn GameObject {
+        self.game_objects[id]
+    }
+
+    fn get_id(&self, game_object: &dyn GameObject) -> Option<usize> {
+        for (id, a_game_object) in self.game_objects.iter().enumerate() {
+            if game_object as *const _ == *a_game_object as *const _ {
+                return Some(id);
             }
-            print!("\n");
+        }
+        None
+    }
+
+    fn get_by_name(&self, name: String) -> Vec<usize> {
+        self.game_objects
+            .iter()
+            .filter(|x| x.get_name() == name)
+            .filter_map(|x| self.get_id(*x))
+            .collect()
+    }
+
+    fn apply(&'a mut self, game_action: GameAction) {
+        match game_action {
+            GameAction::MeleeAttack { target } => {
+                let name = self.game_objects[target].get_name();
+                let hp = self.game_objects[target].get_hp();
+                println!("attacking {name} with {hp}");
+                self.game_objects[target].take_damage(10);
+                let hp = self.game_objects[target].get_hp();
+                let name = self.game_objects[target].get_name();
+                println!("{name} now has {hp}");
+            }
+            GameAction::Move { target, vector } => println!("moving {target}"),
+            GameAction::None => println!("do nothing"),
         }
     }
 }
 
 fn main() {
     let mut character = Character::gen();
-    println!("{:#?}", character);
+    let mut monster = Monster::gen();
+    let mut game = Game::new();
+    let character_id = game.insert(&mut character);
+    let monster_id = game.insert(&mut monster);
 
-    let mut monster = Monster {
-        name: "Goblin".to_string(),
-        ac: 14,
-        hit_dice: 1,
-        no_of_attacks: 1,
-        damage: DicePool::new(1, Dice::D6),
-        hp: 8,
-        max_hp: 8,
-        position: Point { x: 4, y: 3 },
+    let agent_character = PrototypeAgent {
+        actor: character_id,
     };
+    let action_character = agent_character.decide_action(&game);
+    game.apply(action_character);
 
-    let mut game = Game {
-        character,
-        monster,
-        width: 10,
-        height: 5,
-        turn: 0,
-    };
+    // let agent_monster = OnlyAttackAgent { actor: &monster };
+    //let action_monster = agent_monster.decide_action();
+    //println!("action character: {:#?}", action_character);
+    //    println!("action monster: {:#?}", action_monster);
 
-    while game.character.hp > 0 && game.monster.hp > 0 {
-        game.update();
-        View::draw(&game);
-    }
+    //action_character
+
+    // println!("{:#?}", character);
+
+    // let mut game = Game {
+    //     game_objects: vec![
+    //         GameObject::Character(character),
+    //         GameObject::Monster(monster),
+    //     ],
+    //     width: 10,
+    //     height: 5,
+    //     turn: 0,
+    // };
+
+    // game.update();
+    // View::draw(&game);
 }

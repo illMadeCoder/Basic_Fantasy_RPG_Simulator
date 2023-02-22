@@ -1,11 +1,9 @@
-use crate::action::AsPoint;
-use crate::agent::Agent;
+use crate::dice::Dice;
+use crate::point::Point;
 use crate::DicePool;
-use crate::HasAC;
-use crate::HasHP;
-use crate::HasName;
-use crate::Point;
+use crate::GameObject;
 
+#[derive(Debug)]
 pub struct Monster {
     pub name: String,
     pub ac: i32,
@@ -17,36 +15,61 @@ pub struct Monster {
     pub position: Point,
 }
 
-impl AsPoint for Monster {
-    fn as_point(&mut self) -> &mut Point {
-        &mut self.position
+impl Monster {
+    pub fn gen() -> Monster {
+        Monster {
+            name: "Goblin".to_string(),
+            ac: 14,
+            hit_dice: 1,
+            no_of_attacks: 1,
+            damage: DicePool::new(1, Dice::D6),
+            hp: 8,
+            max_hp: 8,
+            position: Point { x: 4, y: 3 },
+        }
     }
 }
 
-impl Agent for Monster {}
+// impl AsPoint for Monster {
+//     fn as_point(&mut self) -> &mut Point {
+//         &mut self.position
+//     }
+// }
 
-impl HasAC for Monster {
-    fn ac(&self) -> i32 {
-        self.ac
-    }
-}
+// impl Agent for Monster {
+//     fn next_action<'a>(&'a self, game: &'a mut Game) -> GameAction<'a> {
+//         let a = GameActionType::MeleeAttack {
+//             attack: DicePool::new(1, Dice::D20),
+//             damage: DicePool::new(1, Dice::D8),
+//             target: &mut game.character,
+//         };
 
-impl HasHP for Monster {
-    fn get_hp(&self) -> i32 {
-        self.hp
-    }
+//         GameAction::new(a)
+//     }
+//     fn take_turn<'a>(&'a self, game: &'a mut Game) {
+//         let mut action = self.next_action(game);
+//         let action_result = action.invoke();
+//         println!("{0} attacks {1}", self.name(), game.character.name());
+//         println!("{:?}", action_result);
+//     }
+// }
 
-    fn get_max_hp(&self) -> i32 {
-        self.max_hp
-    }
+// impl HasAC for Monster {
+//     fn ac(&self) -> i32 {
+//         self.ac
+//     }
+// }
 
-    fn set_hp(&mut self, x: i32) {
-        self.hp = x;
-    }
-}
+// impl HasHP for Monster {
+//     fn get_hp(&self) -> i32 {
+//         self.hp
+//     }
 
-impl HasName for Monster {
-    fn name(&self) -> &str {
-        &self.name
-    }
-}
+//     fn get_max_hp(&self) -> i32 {
+//         self.max_hp
+//     }
+
+//     fn set_hp(&mut self, x: i32) {
+//         self.hp = x;
+//     }
+// }

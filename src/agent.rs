@@ -1,23 +1,5 @@
-use crate::Action;
-use crate::ActionType;
-use crate::Attackable;
-use crate::Dice;
-use crate::DicePool;
-use crate::HasName;
+use crate::{Game, GameAction};
 
-pub trait Agent: HasName {
-    fn next_action<'a>(&'a mut self, attackable: &'a mut dyn Attackable) -> Action<'a> {
-        let a = ActionType::MeleeAttack {
-            attack: DicePool::new(1, Dice::D20),
-            damage: DicePool::new(1, Dice::D8),
-            target: attackable,
-        };
-        Action::new(a)
-    }
-    fn take_turn<'a>(&'a mut self, attackable: &'a mut dyn Attackable) {
-        let mut action = self.next_action(attackable);
-        let action_result = action.invoke();
-        println!("{0} attacks {1}", self.name(), attackable.name());
-        println!("{:?}", action_result);
-    }
+pub trait Agent {
+    fn decide_action(&self, target: &Game) -> GameAction;
 }

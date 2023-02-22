@@ -1,6 +1,4 @@
 use crate::ability_score_set::AbilityScoreSet;
-use crate::action::{AsPoint, HasAC, HasHP, HasName};
-use crate::agent::Agent;
 use crate::ancestry::Ancestry;
 use crate::character_error::CharacterError;
 use crate::class::Class;
@@ -8,6 +6,7 @@ use crate::dice::Dice;
 use crate::dicepool::DicePool;
 use crate::item::Item;
 use crate::point::Point;
+use crate::GameAction;
 
 use names::Generator;
 
@@ -27,63 +26,53 @@ pub struct Character {
     pub position: Point,
 }
 
-impl AsPoint for Character {
-    fn as_point(&mut self) -> &mut Point {
-        &mut self.position
-    }
-}
+// impl AsPoint for Character {
+//     fn as_point(&mut self) -> &mut Point {
+//         &mut self.position
+//     }
+// }
 
-impl Agent for Character {
-    fn next_action<'a>(
-        &'a mut self,
-        attackable: &'a mut dyn crate::action::Attackable,
-    ) -> crate::action::Action<'a> {
-        // let a = crate::action::ActionType::MeleeAttack {
-        //     attack: DicePool::new(1, Dice::D20),
-        //     damage: DicePool::new(1, Dice::D8),
-        //     target: attackable,
-        // };
+// impl Agent for Character {
+//     fn next_action<'a>(&'a self, game: &'a Game) -> GameAction<'a> {
+//         // let a = crate::action::ActionType::MeleeAttack {
+//         //     attack: DicePool::new(1, Dice::D20),
+//         //     damage: DicePool::new(1, Dice::D8),
+//         //     target: attackable,
+//         // };
 
-        let a = crate::action::ActionType::Move {
-            target: self,
-            vector: Point { x: 0, y: -1 },
-        };
-        crate::action::Action::new(a)
-    }
+//         let a = crate::action::GameActionType::Move {
+//             target: &self,
+//             vector: Point { x: 0, y: -1 },
+//         };
+//         crate::action::GameAction::new(a)
+//     }
+// }
 
-    fn take_turn<'a>(&'a mut self, attackable: &'a mut dyn crate::action::Attackable) {
-        let mut action = self.next_action(attackable);
-        let action_result = action.invoke();
-        println!("{0} attacks {1}", self.name(), attackable.name());
-        println!("{:?}", action_result);
-    }
-}
+// impl GameObject for Character {
+//     fn name(&self) -> &str {
+//         &self.name
+//     }
+// }
 
-impl HasName for Character {
-    fn name(&self) -> &str {
-        &self.name
-    }
-}
+// impl HasAC for Character {
+//     fn ac(&self) -> i32 {
+//         self.ac
+//     }
+// }
 
-impl HasAC for Character {
-    fn ac(&self) -> i32 {
-        self.ac
-    }
-}
+// impl HasHP for Character {
+//     fn get_hp(&self) -> i32 {
+//         self.hp
+//     }
 
-impl HasHP for Character {
-    fn get_hp(&self) -> i32 {
-        self.hp
-    }
+//     fn get_max_hp(&self) -> i32 {
+//         self.max_hp
+//     }
 
-    fn get_max_hp(&self) -> i32 {
-        self.max_hp
-    }
-
-    fn set_hp(&mut self, x: i32) {
-        self.hp = x;
-    }
-}
+//     fn set_hp(&mut self, x: i32) {
+//         self.hp = x;
+//     }
+// }
 
 #[derive(Debug)]
 pub enum Hand {
