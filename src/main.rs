@@ -1,20 +1,17 @@
 #![allow(dead_code)]
 
-mod actor;
-mod agent;
 mod character;
 mod dice_expr;
-mod game_action;
+mod game;
 mod item;
 mod monster;
 mod point;
-use actor::{Actor, Potential};
-use agent::Agent;
+
 use character::Character;
-use dice_expr::{Dice, DicePool, DiceRollSum};
-use game_action::GameAction;
+use dice_expr::{DicePool, DiceRollSum};
+use game::{Actor, Agent, Potential};
+use game::{Game, GameAction, GameObject};
 use monster::Monster;
-use point::Point;
 
 use std::collections::HashSet;
 use std::io;
@@ -155,26 +152,6 @@ fn prompt_character_stat_roll(prompt_stat_name: &str) -> i32 {
 //     }
 // }
 
-// pub struct View {}
-
-// impl View {
-//     pub fn draw(game: &Game) {
-//         for y in 0..game.height {
-//             for x in 0..game.width {
-//                 let point = Point { x, y };
-//                 // if game.character.position == point {
-//                 //     print!("@")
-//                 // } else if game.monster.position == point {
-//                 //     print!("m");
-//                 // } else {
-//                 //     print!(".");
-//                 // }
-//             }
-//             print!("\n");
-//         }
-//     }
-// }
-
 pub struct PrototypeAgent {
     actor: usize,
 }
@@ -203,7 +180,7 @@ impl Actor for Character {
 
 impl Actor for Monster {
     fn potential_set(&self) -> HashSet<Potential> {
-        let mut set = HashSet::new();
+        let set = HashSet::new();
         //set.insert(Potential::Attack);
         set
     }
@@ -278,13 +255,6 @@ impl Actor for Monster {
 //     },
 // }
 
-pub trait GameObject: Actor {
-    fn get_ac(&self) -> i32;
-    fn get_name(&self) -> &str;
-    fn take_damage(&mut self, damage: i32);
-    fn get_hp(&self) -> i32;
-}
-
 impl GameObject for Monster {
     fn get_ac(&self) -> i32 {
         10
@@ -315,71 +285,16 @@ impl GameObject for Character {
     }
 }
 
-struct Game<'a> {
-    game_objects: Vec<&'a mut dyn GameObject>,
-}
-
-impl<'a> Game<'a> {
-    fn new() -> Game<'a> {
-        Game {
-            game_objects: Vec::new(),
-        }
-    }
-
-    fn insert(&mut self, game_objects: &'a mut dyn GameObject) -> usize {
-        let i = self.game_objects.len();
-        self.game_objects.push(game_objects);
-        i
-    }
-
-    fn get(&self, id: usize) -> &dyn GameObject {
-        self.game_objects[id]
-    }
-
-    fn get_id(&self, game_object: &dyn GameObject) -> Option<usize> {
-        for (id, a_game_object) in self.game_objects.iter().enumerate() {
-            if game_object as *const _ == *a_game_object as *const _ {
-                return Some(id);
-            }
-        }
-        None
-    }
-
-    fn get_by_name(&self, name: String) -> Vec<usize> {
-        self.game_objects
-            .iter()
-            .filter(|x| x.get_name() == name)
-            .filter_map(|x| self.get_id(*x))
-            .collect()
-    }
-
-    fn apply(&'a mut self, game_action: GameAction) {
-        match game_action {
-            GameAction::MeleeAttack { target } => {
-                let name = self.game_objects[target].get_name();
-                let hp = self.game_objects[target].get_hp();
-                println!("attacking {name} with {hp}");
-                self.game_objects[target].take_damage(10);
-                let hp = self.game_objects[target].get_hp();
-                let name = self.game_objects[target].get_name();
-                println!("{name} now has {hp}");
-            }
-            GameAction::Move { target, vector } => println!("moving {target}"),
-            GameAction::None => println!("do nothing"),
-        }
-    }
-}
-
 fn main() {
-    // let mut character = Character::gen();
-    // let mut monster = Monster::gen();
-    // let mut game = Game::new();
-    // let character_id = game.insert(&mut character);
-    // let monster_id = game.insert(&mut monster);
+    let mut character = Character::gen();
+    let mut monster = Monster::gen();
+    let mut game = Game::new();
+    let character_id = game.insert(&mut character);
+    let _monster_id = game.insert(&mut monster);
 
-    // let agent_character = PrototypeAgent {
-    //     actor: character_id,
-    // };
-    // let action_character = agent_character.decide_action(&game);
-    // game.apply(action_character);
+    let agent_character = PrototypeAgent {
+        actor: character_id,
+    };
+    let action_character = agent_character.decide_action(&game);
+    game.apply(action_character);
 }

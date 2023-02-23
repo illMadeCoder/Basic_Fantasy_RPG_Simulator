@@ -5,7 +5,6 @@ use super::class::Class;
 use crate::dice_expr::{Dice, DicePool};
 use crate::item::Item;
 use crate::point::Point;
-use crate::GameAction;
 
 use names::Generator;
 

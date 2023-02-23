@@ -1,6 +1,5 @@
 use crate::dice_expr::{Dice, DicePool};
 use crate::point::Point;
-use crate::GameObject;
 
 #[derive(Debug)]
 pub struct Monster {

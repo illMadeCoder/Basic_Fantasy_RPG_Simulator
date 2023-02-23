@@ -1,5 +1,5 @@
 use super::ability::Ability;
-use super::ability_score::{AbilityScore, Score};
+use super::ability_score::AbilityScore;
 use crate::dice_expr::{Dice, DicePool};
 
 #[derive(Debug)]
@@ -31,7 +31,7 @@ impl AbilityScoreSet {
         [self.str, self.int, self.wis, self.dex, self.con, self.cha]
     }
 
-    pub fn get(&self, ability: Ability) -> Score {
+    pub fn get(&self, ability: Ability) -> i32 {
         match ability {
             Ability::Str => self.str.1,
             Ability::Int => self.int.1,
@@ -42,8 +42,8 @@ impl AbilityScoreSet {
         }
     }
 
-    fn gen_score() -> Score {
-        Self::ability_score_dicepool().dice_roll_sum().sum as Score
+    fn gen_score() -> i32 {
+        Self::ability_score_dicepool().dice_roll_sum().sum
     }
 
     pub fn gen() -> Self {

@@ -1,14 +1,10 @@
 use super::ability::Ability;
 
-pub type Score = i32;
-
-pub type Modifier = i32;
-
 #[derive(Debug)]
-pub struct AbilityScore(pub Ability, pub Score);
+pub struct AbilityScore(pub Ability, pub i32);
 
 impl AbilityScore {
-    fn modifier(self) -> Modifier {
+    fn modifier(self) -> i32 {
         match self.1 {
             x if x <= 3 => -3,
             x if x <= 5 => -2,
