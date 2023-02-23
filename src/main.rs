@@ -1,26 +1,17 @@
 #![allow(dead_code)]
 
-mod ability;
-mod ability_score;
-mod ability_score_set;
 mod actor;
 mod agent;
-mod ancestry;
 mod character;
-mod character_error;
-mod class;
-mod dice;
-mod dicepool;
+mod dice_expr;
 mod game_action;
 mod item;
 mod monster;
 mod point;
-
 use actor::{Actor, Potential};
 use agent::Agent;
 use character::Character;
-use dice_expr::dice::Dice;
-use dice_expr::dicepool::{DicePool, DiceRollSum};
+use dice_expr::{Dice, DicePool, DiceRollSum};
 use game_action::GameAction;
 use monster::Monster;
 use point::Point;

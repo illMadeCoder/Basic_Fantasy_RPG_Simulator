@@ -1,4 +1,4 @@
-use crate::ability::Ability;
+use super::ability::Ability;
 
 pub type Score = i32;
 

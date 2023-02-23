@@ -1,7 +1,6 @@
-use crate::ability::Ability;
-use crate::ability_score::{AbilityScore, Score};
-use crate::dice::Dice;
-use crate::dicepool::DicePool;
+use super::ability::Ability;
+use super::ability_score::{AbilityScore, Score};
+use crate::dice_expr::{Dice, DicePool};
 
 #[derive(Debug)]
 pub struct AbilityScoreSet {
@@ -32,7 +31,7 @@ impl AbilityScoreSet {
         [self.str, self.int, self.wis, self.dex, self.con, self.cha]
     }
 
-    pub fn get(&self, ability: Ability) -> Score {
+    pub fn get(self, ability: Ability) -> Score {
         match ability {
             Ability::Str => self.str.1,
             Ability::Int => self.int.1,

@@ -1,4 +1,4 @@
-use crate::dice::{Dice, DiceError, DiceNumType};
+use super::dice::{Dice, DiceError, DiceNumType};
 use std::convert::From;
 use std::str::FromStr;
 

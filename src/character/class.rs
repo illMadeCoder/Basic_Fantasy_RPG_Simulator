@@ -1,6 +1,6 @@
-use crate::ability::Ability;
-use crate::ability_score_set::AbilityScoreSet;
-use crate::character_error::CharacterError;
+use super::ability::Ability;
+use super::ability_score_set::AbilityScoreSet;
+use super::character_error::CharacterError;
 use rand::Rng;
 
 #[derive(Debug, PartialEq)]

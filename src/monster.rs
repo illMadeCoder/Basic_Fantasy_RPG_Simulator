@@ -1,6 +1,5 @@
-use crate::dice::Dice;
+use crate::dice_expr::{Dice, DicePool};
 use crate::point::Point;
-use crate::DicePool;
 use crate::GameObject;
 
 #[derive(Debug)]

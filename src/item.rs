@@ -1,4 +1,4 @@
-use crate::dicepool::DicePool;
+use crate::dice_expr::DicePool;
 
 #[derive(Debug)]
 pub struct Item {
