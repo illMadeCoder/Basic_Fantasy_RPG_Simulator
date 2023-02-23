@@ -19,8 +19,8 @@ mod point;
 use actor::{Actor, Potential};
 use agent::Agent;
 use character::Character;
-use dice::Dice;
-use dicepool::{DicePool, DiceRollSum};
+use dice_expr::dice::Dice;
+use dice_expr::dicepool::{DicePool, DiceRollSum};
 use game_action::GameAction;
 use monster::Monster;
 use point::Point;
@@ -380,37 +380,15 @@ impl<'a> Game<'a> {
 }
 
 fn main() {
-    let mut character = Character::gen();
-    let mut monster = Monster::gen();
-    let mut game = Game::new();
-    let character_id = game.insert(&mut character);
-    let monster_id = game.insert(&mut monster);
+    // let mut character = Character::gen();
+    // let mut monster = Monster::gen();
+    // let mut game = Game::new();
+    // let character_id = game.insert(&mut character);
+    // let monster_id = game.insert(&mut monster);
 
-    let agent_character = PrototypeAgent {
-        actor: character_id,
-    };
-    let action_character = agent_character.decide_action(&game);
-    game.apply(action_character);
-
-    // let agent_monster = OnlyAttackAgent { actor: &monster };
-    //let action_monster = agent_monster.decide_action();
-    //println!("action character: {:#?}", action_character);
-    //    println!("action monster: {:#?}", action_monster);
-
-    //action_character
-
-    // println!("{:#?}", character);
-
-    // let mut game = Game {
-    //     game_objects: vec![
-    //         GameObject::Character(character),
-    //         GameObject::Monster(monster),
-    //     ],
-    //     width: 10,
-    //     height: 5,
-    //     turn: 0,
+    // let agent_character = PrototypeAgent {
+    //     actor: character_id,
     // };
-
-    // game.update();
-    // View::draw(&game);
+    // let action_character = agent_character.decide_action(&game);
+    // game.apply(action_character);
 }
