@@ -1,20 +1,19 @@
-pub struct View {}
+use crate::point::Point;
+use crate::Game;
 
-impl View {
-    pub fn draw(game: &Game) {
-        for y in 0..game.height {
-            for x in 0..game.width {
-                let point = Point { x, y };
-                // if game.character.position == point {
-                //     print!("@")
-                // } else if game.monster.position == point {
-                //     print!("m");
-                // } else {
-                //     print!(".");
-                // }
-                print!(".");
-            }
-            print!("\n");
+pub fn draw(game: &Game) {
+    for y in 0..10 {
+        for x in 0..10 {
+            let point = Point { x, y };
+            // if game.character.position == point {
+            //     print!("@")
+            // } else if game.monster.position == point {
+            //     print!("m");
+            // } else {
+            //     print!(".");
+            // }
+            print!(".");
         }
+        print!("\n");
     }
 }

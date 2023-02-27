@@ -2,8 +2,8 @@ use super::ability_score_set::AbilityScoreSet;
 use super::ancestry::Ancestry;
 use super::character_error::CharacterError;
 use super::class::Class;
+use super::equipment::{Equipment, HandEquipType};
 use crate::dice_expr::{Dice, DicePool};
-use crate::item::Item;
 use crate::point::Point;
 
 use names::Generator;
@@ -24,68 +24,6 @@ pub struct Character {
     pub position: Point,
 }
 
-// impl AsPoint for Character {
-//     fn as_point(&mut self) -> &mut Point {
-//         &mut self.position
-//     }
-// }
-
-// impl Agent for Character {
-//     fn next_action<'a>(&'a self, game: &'a Game) -> GameAction<'a> {
-//         // let a = crate::action::ActionType::MeleeAttack {
-//         //     attack: DicePool::new(1, Dice::D20),
-//         //     damage: DicePool::new(1, Dice::D8),
-//         //     target: attackable,
-//         // };
-
-//         let a = crate::action::GameActionType::Move {
-//             target: &self,
-//             vector: Point { x: 0, y: -1 },
-//         };
-//         crate::action::GameAction::new(a)
-//     }
-// }
-
-// impl GameObject for Character {
-//     fn name(&self) -> &str {
-//         &self.name
-//     }
-// }
-
-// impl HasAC for Character {
-//     fn ac(&self) -> i32 {
-//         self.ac
-//     }
-// }
-
-// impl HasHP for Character {
-//     fn get_hp(&self) -> i32 {
-//         self.hp
-//     }
-
-//     fn get_max_hp(&self) -> i32 {
-//         self.max_hp
-//     }
-
-//     fn set_hp(&mut self, x: i32) {
-//         self.hp = x;
-//     }
-// }
-
-#[derive(Debug)]
-pub enum Hand {
-    OneHanded(Item),
-    DualHanded(Item, Item),
-    TwoHanded(Item),
-    None,
-}
-
-#[derive(Debug)]
-pub struct Equipment {
-    pub hand: Hand,
-    pub armor: Option<Item>,
-}
-
 impl Character {
     pub fn new(
         name: String,
@@ -102,7 +40,7 @@ impl Character {
                 ability_score_set,
                 money,
                 equipment: Equipment {
-                    hand: Hand::None,
+                    hand: HandEquipType::None,
                     armor: None,
                 },
                 level: 1,
