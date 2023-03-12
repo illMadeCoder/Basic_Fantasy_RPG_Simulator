@@ -23,7 +23,7 @@ impl Monster {
             damage: DicePool::new(1, Dice::D6),
             hp: 8,
             max_hp: 8,
-            position: Point { x: 4, y: 3 },
+            position: Point { x: 3, y: 1 },
         }
     }
 }

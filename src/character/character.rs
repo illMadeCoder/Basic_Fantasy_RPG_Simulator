@@ -48,7 +48,7 @@ impl Character {
                 max_hp: 8,
                 hp: 8,
                 ac: 10,
-                position: Point { x: 3, y: 3 },
+                position: Point { x: 2, y: 1 },
             })
         } else {
             Err(CharacterError::InvalidCharacterError)

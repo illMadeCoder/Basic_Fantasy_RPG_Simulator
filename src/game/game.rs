@@ -1,36 +1,8 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{borrow::BorrowMut, cell::RefCell, rc::Rc};
 
-use crate::point::Point;
+use crate::{grid::Grid, point::Point};
 
 use super::{GameAction, GameObject};
-
-pub struct Grid<T> {
-    pub vec: Vec<Option<T>>,
-    pub width: usize,
-    pub height: usize,
-}
-
-impl<T> Grid<T> {
-    pub fn new(width: usize, height: usize) -> Grid<T> {
-        let vec: Vec<Option<T>> = (0..width * height).map(|_| None).collect();
-        Grid { vec, width, height }
-    }
-
-    fn point_to_index(&self, Point { x, y }: Point) -> usize {
-        x + y * self.width
-    }
-
-    pub fn insert_at(&mut self, element: T, p: Point) {
-        let i = self.point_to_index(p);
-        self.vec.insert(i, Some(element))
-    }
-
-    /// # safety
-    /// vector index is safe due to pre total population
-    pub fn get_at(&self, p: Point) -> &Option<T> {
-        &self.vec[self.point_to_index(p)]
-    }
-}
 
 pub struct Game {
     pub grid: Grid<Rc<RefCell<dyn GameObject>>>,
@@ -39,15 +11,17 @@ pub struct Game {
 impl Game {
     pub fn new() -> Game {
         Game {
-            grid: Grid::new(4, 3),
+            grid: Grid::new(4, 4),
         }
     }
 
-    pub fn insert_at(&mut self, game_object: Rc<RefCell<dyn GameObject>>, p: Point) {
-        self.grid.insert_at(game_object, p);
+    pub fn insert(&mut self, game_object: &Rc<RefCell<dyn GameObject>>) {
+        let rc = Rc::clone(game_object);
+        let position = rc.borrow().get_position();
+        self.grid.insert(rc, position);
     }
 
-    pub fn apply(&self, game_action: GameAction) {
+    pub fn apply(&mut self, game_action: GameAction) {
         match game_action {
             GameAction::MeleeAttack { source, target } => {
                 println!(
@@ -68,7 +42,7 @@ impl Game {
                         source.borrow().get_name(),
                         damage
                     );
-                    target.borrow_mut().take_damage(damage);
+                    (*target).borrow_mut().take_damage(damage);
                     println!(
                         "{0} takes {1} damage and now has {2} hp",
                         target.borrow().get_name(),
@@ -77,7 +51,14 @@ impl Game {
                     );
                 }
             }
-            GameAction::Move { target, vector: _ } => println!("moving"),
+            GameAction::Move { target, vector } => {
+                println!("move");
+                let prev_pos = target.borrow().get_position();
+                self.grid.remove(prev_pos);
+                (*target).borrow_mut().displace(vector);
+                let cur_pos = target.borrow().get_position();
+                self.grid.insert(target, cur_pos);
+            }
             GameAction::None => println!("do nothing"),
         }
     }
