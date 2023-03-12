@@ -1,4 +1,8 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crate::point::Point;
+
+use super::GameObject;
 // pub trait HasAC {
 //     fn ac(&self) -> i32;
 // }
@@ -68,10 +72,15 @@ use crate::point::Point;
 //     },
 // }
 
-#[derive(Debug)]
 pub enum GameAction {
-    MeleeAttack { target: usize },
-    Move { target: usize, vector: Point },
+    MeleeAttack {
+        source: Rc<RefCell<dyn GameObject>>,
+        target: Rc<RefCell<dyn GameObject>>,
+    },
+    Move {
+        target: Rc<RefCell<dyn GameObject>>,
+        vector: Point,
+    },
     None,
 }
 
