@@ -13,23 +13,23 @@ impl<T> Grid<T> {
         Grid { vec, width, height }
     }
 
-    fn point_to_index(&self, Point { x, y }: Point) -> usize {
+    fn point_to_index(&self, Point { x, y }: &Point) -> usize {
         (x + y * self.width as i32) as usize
     }
 
-    pub fn insert(&mut self, element: T, p: Point) {
+    pub fn insert(&mut self, element: T, p: &Point) {
         let i = self.point_to_index(p);
         self.vec[i] = Some(element);
     }
 
-    pub fn remove(&mut self, p: Point) {
+    pub fn remove(&mut self, p: &Point) {
         let i = self.point_to_index(p);
         self.vec[i] = None;
     }
 
     /// # safety
     /// vector index is safe due to pre total population
-    pub fn get(&self, p: Point) -> Option<&T> {
+    pub fn get(&self, p: &Point) -> Option<&T> {
         self.vec[self.point_to_index(p)].as_ref()
     }
 }
@@ -60,7 +60,7 @@ mod test {
         let mut g: Grid<i32> = Grid::new(1, 1);
         let p = Point { x: 0, y: 0 };
         let val = 1;
-        g.insert(val, p);
+        g.insert(val, &p);
         assert_eq!(g.vec, vec![Some(val)])
     }
 
@@ -69,8 +69,8 @@ mod test {
         let mut g: Grid<i32> = Grid::new(1, 1);
         let p = Point { x: 0, y: 0 };
         let val = 1;
-        g.insert(val, p);
-        assert_eq!(*g.get(p).unwrap(), 1)
+        g.insert(val, &p);
+        assert_eq!(*g.get(&p).unwrap(), 1)
     }
 
     #[test]
@@ -78,8 +78,8 @@ mod test {
         let mut g: Grid<i32> = Grid::new(1, 1);
         let p = Point { x: 0, y: 0 };
         let val = 1;
-        g.insert(val, p);
-        g.remove(p);
+        g.insert(val, &p);
+        g.remove(&p);
         assert_eq!(g.vec, vec![None])
     }
 
@@ -94,7 +94,7 @@ mod test {
         let p_bot_right = Point { x: 2, y: 2 };
 
         let v = vec![Some(val), None, None, None, None, None, None, None, None];
-        g.insert(val, p_top_left);
+        g.insert(val, &p_top_left);
         assert_eq!(g.vec, v);
 
         let v = vec![
@@ -108,7 +108,7 @@ mod test {
             None,
             Some(val),
         ];
-        g.insert(val, p_bot_right);
+        g.insert(val, &p_bot_right);
         assert_eq!(g.vec, v);
 
         let v = vec![
@@ -122,7 +122,7 @@ mod test {
             None,
             Some(val),
         ];
-        g.insert(val, p_center_center);
+        g.insert(val, &p_center_center);
         assert_eq!(g.vec, v);
 
         let v = vec![
@@ -136,7 +136,7 @@ mod test {
             None,
             Some(val),
         ];
-        g.insert(val, p_top_right);
+        g.insert(val, &p_top_right);
         assert_eq!(g.vec, v);
 
         let v = vec![
@@ -150,7 +150,7 @@ mod test {
             None,
             Some(val),
         ];
-        g.remove(p_top_right);
+        g.remove(&p_top_right);
         assert_eq!(g.vec, v);
     }
 }

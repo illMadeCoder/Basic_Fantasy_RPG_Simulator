@@ -1,5 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
+use crate::direction::Direction;
 use crate::point::Point;
 
 use super::GameObject;
@@ -79,7 +80,7 @@ pub enum GameAction {
     },
     Move {
         target: Rc<RefCell<dyn GameObject>>,
-        vector: Point,
+        direction: Direction,
     },
     None,
 }

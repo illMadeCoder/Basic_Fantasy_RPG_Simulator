@@ -2,6 +2,7 @@
 
 mod character;
 mod dice_expr;
+mod direction;
 mod game;
 mod grid;
 mod item;
@@ -14,7 +15,6 @@ use game::{Actor, Agent, PotentialAction};
 use game::{Game, GameAction, GameObject};
 use monster::Monster;
 use point::Point;
-
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -130,11 +130,10 @@ fn main() {
         let mut split = trimmed.split(' ');
         let action = split.next().unwrap();
         if action == "move" {
-            let x: i32 = split.next().unwrap().parse().unwrap();
-            let y: i32 = split.next().unwrap().parse().unwrap();
+            let dir = split.next().unwrap();
             game.apply(GameAction::Move {
                 target: Rc::clone(&c),
-                vector: Point::new(x, y),
+                direction: dir.parse().unwrap(),
             });
         } else if action == "attack" {
             game.apply(GameAction::MeleeAttack {
