@@ -40,31 +40,32 @@ impl Game {
             let action = split.next().unwrap();
             if action == "move" {
                 let dir = split.next().unwrap();
-                // .apply(GameAction::Move {
-                //     target: Rc::clone(&c),
-                //     direction: dir.parse().unwrap(),
-                // });
+                self.apply(GameAction::Move {
+                    target: c.clone(),
+                    direction: dir.parse().unwrap(),
+                });
             } else if action == "attack" {
                 self.apply(GameAction::MeleeAttack {
-                    source: c,
-                    target: m,
+                    source: c.clone(),
+                    target: m.clone(),
                 });
             } else {
                 self.apply(GameAction::None);
             }
         } else {
             self.apply(GameAction::MeleeAttack {
-                source: m,
-                target: c,
+                source: m.clone(),
+                target: c.clone(),
             });
         }
-        // if c.borrow().get_hp() <= 0 {
-        //     self.over = true;
-        //     println!("{} won", m.borrow().get_name());
-        // } else if m.borrow().get_hp() <= 0 {
-        //     self.over = true;
-        //     println!("{} won", c.borrow().get_name());
-        // }
+
+        if c.upgrade().unwrap().borrow().get_hp() <= 0 {
+            self.over = true;
+            println!("{} won", m.upgrade().unwrap().borrow().get_name());
+        } else if m.upgrade().unwrap().borrow().get_hp() <= 0 {
+            self.over = true;
+            println!("{} won", c.upgrade().unwrap().borrow().get_name());
+        }
 
         self.turn += 1;
     }
@@ -79,15 +80,6 @@ impl Game {
             .filter_map(|s_p| self.grid.get(s_p))
             .collect()
     }
-
-    // pub fn insert(&mut self, game_object: &Rc<RefCell<dyn GameObject>>) {
-    //     let rc = Rc::clone(game_object);
-    //     let position = rc.borrow().get_position();
-    //     self.grid.insert(rc, &position);
-
-    //     let rc = Rc::clone(game_object);
-    //     self.turn_table.push(rc);
-    // }
 
     pub fn insert(&mut self, game_object: Rc<RefCell<dyn GameObject>>) {
         let position = game_object.borrow().get_position();
