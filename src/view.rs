@@ -10,7 +10,7 @@ pub fn draw(game: &Game) {
             }
             let c = match game.grid.get(&Point { x, y }) {
                 None => '.',
-                Some(g) => g.borrow().get_c(),
+                Some(g) => g.upgrade().unwrap().borrow().get_c(),
             };
 
             print!(" {}", c);

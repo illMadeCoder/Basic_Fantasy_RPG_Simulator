@@ -10,7 +10,7 @@ pub enum Direction {
     Down,
 }
 
-pub const DIRECTIONS: &'static [Direction] = &[
+pub const DIRECTIONS: &[Direction] = &[
     Direction::Left,
     Direction::Right,
     Direction::Up,

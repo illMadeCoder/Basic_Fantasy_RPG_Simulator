@@ -1,7 +1,9 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::RefCell,
+    rc::{Rc, Weak},
+};
 
 use crate::direction::Direction;
-use crate::point::Point;
 
 use super::GameObject;
 // pub trait HasAC {
@@ -75,11 +77,11 @@ use super::GameObject;
 
 pub enum GameAction {
     MeleeAttack {
-        source: Rc<RefCell<dyn GameObject>>,
-        target: Rc<RefCell<dyn GameObject>>,
+        source: Weak<RefCell<dyn GameObject>>,
+        target: Weak<RefCell<dyn GameObject>>,
     },
     Move {
-        target: Rc<RefCell<dyn GameObject>>,
+        target: Weak<RefCell<dyn GameObject>>,
         direction: Direction,
     },
     None,

@@ -1,4 +1,4 @@
-use dice_expr::{DicePool, DiceRollSum};
+use dice_expr_mod::{DicePool, DiceRollSum};
 use std::io;
 use std::io::prelude::*;
 

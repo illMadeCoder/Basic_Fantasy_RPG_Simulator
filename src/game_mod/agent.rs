@@ -1,4 +1,4 @@
-use crate::game::Game;
+use crate::game_mod::Game;
 use crate::GameAction;
 
 pub trait Agent {

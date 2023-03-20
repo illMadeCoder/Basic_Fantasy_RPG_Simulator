@@ -1,6 +1,6 @@
 use super::ability::Ability;
 use super::ability_score::AbilityScore;
-use crate::dice_expr::{Dice, DicePool};
+use crate::dice_expr_mod::{Dice, DicePool};
 
 #[derive(Debug)]
 pub struct AbilityScoreSet {

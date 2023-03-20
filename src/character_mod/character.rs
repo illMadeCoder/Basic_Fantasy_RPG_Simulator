@@ -3,7 +3,7 @@ use super::ancestry::Ancestry;
 use super::character_error::CharacterError;
 use super::class::Class;
 use super::equipment::{Equipment, HandEquipType};
-use crate::dice_expr::{Dice, DicePool};
+use crate::dice_expr_mod::{Dice, DicePool};
 use crate::point::Point;
 
 use names::Generator;
