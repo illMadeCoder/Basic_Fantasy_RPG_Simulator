@@ -1,9 +1,7 @@
-use std::{cell::RefCell, rc::Rc};
-
-use super::{agent::Agent, Game, GameAction, GameObject};
+use super::{agent::Agent, game_object::GameObjectId, Game, GameAction};
 
 pub struct PrototypeAgent {
-    pub(crate) actor: Rc<RefCell<dyn GameObject>>,
+    pub actor: GameObjectId,
 }
 
 impl Agent for PrototypeAgent {

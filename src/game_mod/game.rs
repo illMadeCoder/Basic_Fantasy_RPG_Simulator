@@ -1,37 +1,37 @@
-use super::{GameAction, GameObject};
-use crate::{direction::DIRECTIONS, grid::Grid, point::Point};
-use std::{
-    cell::RefCell,
-    rc::{Rc, Weak},
+use super::{
+    direction::DIRECTIONS,
+    game_object::{GameObjectId, IntoGameObject},
+    GameAction, GameObject, Point,
 };
 
+type EntityId = usize;
+
 pub struct Game {
-    pub game_objects: Vec<Rc<RefCell<dyn GameObject>>>,
-    pub turn_table: Vec<Weak<RefCell<dyn GameObject>>>,
-    pub grid: Grid<Weak<RefCell<dyn GameObject>>>,
+    pub game_objects: Vec<GameObject>,
     pub turn: i32,
-    pub over: bool,
+    pub end: bool,
 }
 
 impl Game {
     pub fn new() -> Game {
         Game {
             game_objects: Vec::new(),
-            turn_table: Vec::new(),
-            grid: Grid::new(4, 4),
             turn: 0,
-            over: false,
+            end: false,
         }
+    }
+
+    pub fn get_at(&self, p: &Point) -> Option<GameObjectId> {
+        self.game_objects
+            .iter()
+            .find(|x| x.get_position() == *p)
+            .map(|x| x.get_id())
     }
 
     pub fn take_turn(&mut self) {
         println!("turn {}", self.turn);
-        // get game object whose turn it is
-        // let game_object = self.turn_table[self.turn as usize];
-        // get game object agent
+
         let stdin = std::io::stdin();
-        let c = self.turn_table[0].clone();
-        let m = self.turn_table[1].clone();
         if self.turn % 2 == 0 {
             let mut buf = String::new();
             stdin.read_line(&mut buf).unwrap();
@@ -41,30 +41,30 @@ impl Game {
             if action == "move" {
                 let dir = split.next().unwrap();
                 self.apply(GameAction::Move {
-                    target: c.clone(),
+                    target: 0,
                     direction: dir.parse().unwrap(),
                 });
             } else if action == "attack" {
                 self.apply(GameAction::MeleeAttack {
-                    source: c.clone(),
-                    target: m.clone(),
+                    source: 0,
+                    target: 1,
                 });
             } else {
                 self.apply(GameAction::None);
             }
         } else {
             self.apply(GameAction::MeleeAttack {
-                source: m.clone(),
-                target: c.clone(),
+                source: 1,
+                target: 0,
             });
         }
 
-        if c.upgrade().unwrap().borrow().get_hp() <= 0 {
-            self.over = true;
-            println!("{} won", m.upgrade().unwrap().borrow().get_name());
-        } else if m.upgrade().unwrap().borrow().get_hp() <= 0 {
-            self.over = true;
-            println!("{} won", c.upgrade().unwrap().borrow().get_name());
+        if self.game_objects[0].get_hp() <= 0 {
+            self.end = true;
+            println!("{} won", self.game_objects[1].get_name())
+        } else if self.game_objects[1].get_hp() <= 0 {
+            self.end = true;
+            println!("{} won", self.game_objects[0].get_name())
         }
 
         self.turn += 1;
@@ -74,28 +74,26 @@ impl Game {
         DIRECTIONS.iter().map(|dir| Point::from(dir) + *p).collect()
     }
 
-    fn surrounding_game_objects(&self, p: &Point) -> Vec<&Weak<RefCell<dyn GameObject>>> {
+    fn surrounding_game_objects(&self, p: &Point) -> Vec<GameObjectId> {
         Game::surrounding(p)
             .iter()
-            .filter_map(|s_p| self.grid.get(s_p))
+            .filter_map(|s_p| self.get_at(s_p))
             .collect()
     }
 
-    pub fn insert(&mut self, game_object: Rc<RefCell<dyn GameObject>>) {
-        let position = game_object.borrow().get_position();
-        self.grid.insert(Rc::downgrade(&game_object), &position);
-        self.turn_table.push(Rc::downgrade(&game_object));
+    pub fn insert<T: IntoGameObject>(&mut self, game_object: T) {
+        let game_object = game_object.into_game_object(self.game_objects.len());
         self.game_objects.push(game_object);
     }
 
     pub fn apply(&mut self, game_action: GameAction) {
         match game_action {
             GameAction::MeleeAttack { source, target } => {
-                let source_position = source.upgrade().unwrap().borrow().get_position();
+                let source_position = self.game_objects[source].get_position();
                 if !self
                     .surrounding_game_objects(&source_position)
                     .iter()
-                    .any(|x| Rc::ptr_eq(&x.upgrade().unwrap(), &target.upgrade().unwrap()))
+                    .any(|x| *x == target)
                 {
                     println!("target is not in reach");
                     return ();
@@ -103,44 +101,38 @@ impl Game {
 
                 println!(
                     "{0} is attacking {1}",
-                    source.upgrade().unwrap().borrow().get_name(),
-                    target.upgrade().unwrap().borrow().get_name()
+                    self.game_objects[source].get_name(),
+                    self.game_objects[target].get_name()
                 );
 
                 let roll = 15;
                 println!(
                     "{0} rolls to hit against AC {1}",
-                    source.upgrade().unwrap().borrow().get_name(),
+                    self.game_objects[source].get_name(),
                     roll
                 );
 
-                if roll > target.upgrade().unwrap().borrow().get_ac() {
+                if roll > self.game_objects[target].get_ac() {
                     let damage = 3;
                     println!(
                         "{0} rolls {1} for damage",
-                        source.upgrade().unwrap().borrow().get_name(),
+                        self.game_objects[source].get_name(),
                         damage
                     );
-                    target.upgrade().unwrap().borrow_mut().take_damage(damage);
+                    self.game_objects[target].take_damage(damage);
                     println!(
                         "{0} takes {1} damage and now has {2} hp",
-                        target.upgrade().unwrap().borrow().get_name(),
+                        self.game_objects[target].get_name(),
                         damage,
-                        target.upgrade().unwrap().borrow().get_hp()
+                        self.game_objects[target].get_hp()
                     );
                 }
             }
 
             GameAction::Move { target, direction } => {
-                let prev_pos = target.upgrade().unwrap().borrow().get_position();
-                self.grid.remove(&prev_pos);
-                target
-                    .upgrade()
-                    .unwrap()
-                    .borrow_mut()
-                    .displace(direction.into());
-                let cur_pos = target.upgrade().unwrap().borrow().get_position();
-                self.grid.insert(target, &cur_pos);
+                let prev_pos = self.game_objects[target].get_position();
+                self.game_objects[target].displace(direction.into());
+                let cur_pos = self.game_objects[target].get_position();
                 println!("move from {:?} to {:?}", prev_pos, cur_pos);
             }
 

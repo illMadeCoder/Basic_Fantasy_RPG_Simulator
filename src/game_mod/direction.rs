@@ -1,6 +1,5 @@
+use super::point::Point;
 use std::str::FromStr;
-
-use crate::point::Point;
 
 #[derive(Debug)]
 pub enum Direction {

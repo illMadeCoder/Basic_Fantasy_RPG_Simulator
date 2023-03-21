@@ -1,5 +1,4 @@
 use crate::dice_expr_mod::{Dice, DicePool};
-use crate::point::Point;
 
 #[derive(Debug)]
 pub struct Monster {
@@ -8,9 +7,7 @@ pub struct Monster {
     pub hit_dice: u8,
     pub no_of_attacks: u8,
     pub damage: DicePool,
-    pub max_hp: i32,
     pub hp: i32,
-    pub position: Point,
 }
 
 impl Monster {
@@ -22,8 +19,6 @@ impl Monster {
             no_of_attacks: 1,
             damage: DicePool::new(1, Dice::D6),
             hp: 8,
-            max_hp: 8,
-            position: Point { x: 3, y: 1 },
         }
     }
 }

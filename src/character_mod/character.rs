@@ -4,7 +4,6 @@ use super::character_error::CharacterError;
 use super::class::Class;
 use super::equipment::{Equipment, HandEquipType};
 use crate::dice_expr_mod::{Dice, DicePool};
-use crate::point::Point;
 
 use names::Generator;
 
@@ -18,10 +17,7 @@ pub struct Character {
     pub level: u8,
     pub exp: u32,
     pub hp: i32,
-    pub ac: i32,
-    pub max_hp: i32,
     pub equipment: Equipment,
-    pub position: Point,
 }
 
 impl Character {
@@ -45,10 +41,7 @@ impl Character {
                 },
                 level: 1,
                 exp: 0,
-                max_hp: 8,
                 hp: 8,
-                ac: 10,
-                position: Point { x: 2, y: 1 },
             })
         } else {
             Err(CharacterError::InvalidCharacterError)
@@ -72,7 +65,7 @@ impl Character {
     }
 
     fn gen_money() -> i32 {
-        DicePool::new(3, Dice::D6).dice_roll_sum().sum as i32 * 10
+        DicePool::new(3, Dice::D6).dice_roll_sum().sum * 10
     }
 
     pub fn gen() -> Self {
