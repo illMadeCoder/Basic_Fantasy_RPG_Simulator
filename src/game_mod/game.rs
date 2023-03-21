@@ -4,8 +4,6 @@ use super::{
     GameAction, GameObject, Point,
 };
 
-type EntityId = usize;
-
 pub struct Game {
     pub game_objects: Vec<GameObject>,
     pub turn: i32,
@@ -31,32 +29,10 @@ impl Game {
     pub fn take_turn(&mut self) {
         println!("turn {}", self.turn);
 
-        let stdin = std::io::stdin();
         if self.turn % 2 == 0 {
-            let mut buf = String::new();
-            stdin.read_line(&mut buf).unwrap();
-            let trimmed = buf.trim().to_string();
-            let mut split = trimmed.split(' ');
-            let action = split.next().unwrap();
-            if action == "move" {
-                let dir = split.next().unwrap();
-                self.apply(GameAction::Move {
-                    target: 0,
-                    direction: dir.parse().unwrap(),
-                });
-            } else if action == "attack" {
-                self.apply(GameAction::MeleeAttack {
-                    source: 0,
-                    target: 1,
-                });
-            } else {
-                self.apply(GameAction::None);
-            }
+            self.apply(self.game_objects[0].next_action());
         } else {
-            self.apply(GameAction::MeleeAttack {
-                source: 1,
-                target: 0,
-            });
+            self.apply(self.game_objects[1].next_action());
         }
 
         if self.game_objects[0].get_hp() <= 0 {

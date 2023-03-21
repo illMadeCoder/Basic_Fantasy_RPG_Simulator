@@ -8,7 +8,7 @@ mod monster;
 mod view;
 
 use character_mod::Character;
-use game_mod::{Game, GameAction};
+use game_mod::Game;
 use monster::Monster;
 
 fn main() {

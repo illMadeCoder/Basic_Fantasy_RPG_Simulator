@@ -8,10 +8,8 @@ mod point;
 mod prototype_agent;
 
 pub use actor::{Actor, PotentialAction};
-pub use agent::Agent;
 pub use direction::Direction;
 pub use game::Game;
 pub use game_action::GameAction;
 pub use game_object::GameObject;
 pub use point::Point;
-pub use prototype_agent::PrototypeAgent;

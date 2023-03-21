@@ -1,26 +1,26 @@
+use super::agent::Agent;
 use super::point::Point;
+use super::GameAction;
 use crate::Character;
 use crate::Monster;
 
 pub type GameObjectId = usize;
 
-pub struct GameObjectCharacter {
-    character: Character,
-    position: Point,
-    hp: i32,
-    id: GameObjectId,
-}
-
-pub struct GameObjectMonster {
-    monster: Monster,
-    position: Point,
-    hp: i32,
-    id: GameObjectId,
-}
-
 pub enum GameObject {
-    Character(GameObjectCharacter),
-    Monster(GameObjectMonster),
+    Character {
+        character: Character,
+        position: Point,
+        hp: i32,
+        id: GameObjectId,
+        agent: Agent,
+    },
+    Monster {
+        monster: Monster,
+        position: Point,
+        hp: i32,
+        id: GameObjectId,
+        agent: Agent,
+    },
 }
 
 pub trait IntoGameObject {
@@ -29,66 +29,68 @@ pub trait IntoGameObject {
 
 impl IntoGameObject for Character {
     fn into_game_object(self, id: GameObjectId) -> GameObject {
-        GameObject::Character(GameObjectCharacter {
+        GameObject::Character {
             hp: self.hp,
             character: self,
             position: Point::new(1, 2),
             id,
-        })
+            agent: Agent::PlayerAgent { actor: id },
+        }
     }
 }
 
 impl IntoGameObject for Monster {
     fn into_game_object(self, id: GameObjectId) -> GameObject {
-        GameObject::Monster(GameObjectMonster {
+        GameObject::Monster {
             hp: self.hp,
             monster: self,
             position: Point::new(3, 2),
             id,
-        })
+            agent: Agent::PrototypeAgent { actor: id },
+        }
     }
 }
 
 impl GameObject {
     pub fn get_ac(&self) -> i32 {
         match self {
-            GameObject::Character(c) => 10,
-            GameObject::Monster(m) => 10,
+            GameObject::Character { .. } => 10,
+            GameObject::Monster { .. } => 10,
         }
     }
 
     pub fn get_name(&self) -> &str {
         match self {
-            GameObject::Character(c) => &c.character.name,
-            GameObject::Monster(m) => &m.monster.name,
+            GameObject::Character { character, .. } => &character.name,
+            GameObject::Monster { monster, .. } => &monster.name,
         }
     }
 
     pub fn take_damage(&mut self, damage: i32) {
         match self {
-            GameObject::Character(c) => c.hp -= damage,
-            GameObject::Monster(m) => m.hp -= damage,
+            GameObject::Character { hp, .. } => *hp -= damage,
+            GameObject::Monster { hp, .. } => *hp -= damage,
         }
     }
 
     pub fn get_hp(&self) -> i32 {
         match self {
-            GameObject::Character(c) => c.hp,
-            GameObject::Monster(m) => m.hp,
+            GameObject::Character { hp, .. } => *hp,
+            GameObject::Monster { hp, .. } => *hp,
         }
     }
 
     pub fn set_position(&mut self, position: Point) {
         match self {
-            GameObject::Character(c) => c.position = position,
-            GameObject::Monster(m) => m.position = position,
+            GameObject::Character { position: p, .. } => *p = position,
+            GameObject::Monster { position: p, .. } => *p = position,
         }
     }
 
     pub fn get_position(&self) -> Point {
         match self {
-            GameObject::Character(c) => c.position,
-            GameObject::Monster(m) => m.position,
+            GameObject::Character { position, .. } => *position,
+            GameObject::Monster { position, .. } => *position,
         }
     }
 
@@ -98,8 +100,15 @@ impl GameObject {
 
     pub fn get_id(&self) -> GameObjectId {
         match self {
-            GameObject::Character(c) => c.id,
-            GameObject::Monster(m) => m.id,
+            GameObject::Character { id, .. } => *id,
+            GameObject::Monster { id, .. } => *id,
+        }
+    }
+
+    pub fn next_action(&self) -> GameAction {
+        match self {
+            GameObject::Character { agent, .. } => agent.next_action(),
+            GameObject::Monster { agent, .. } => agent.next_action(),
         }
     }
 }
