@@ -12,7 +12,10 @@ pub fn draw(game: &Game) {
             }
             let point = Point { x, y };
             let c = match game.get_at(&point) {
-                Some(_) => 'x',
+                Some(game_object) => match game.get_ref(game_object) {
+                    crate::game_mod::GameObject::Character { .. } => 'C',
+                    crate::game_mod::GameObject::Monster { .. } => 'M',
+                },
                 None => '.',
             };
 

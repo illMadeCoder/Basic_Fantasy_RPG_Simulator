@@ -1,3 +1,5 @@
+use crate::dice_expr_mod::{Dice, DicePool};
+
 use super::{
     direction::DIRECTIONS,
     game_object::{GameObjectId, IntoGameObject},
@@ -24,6 +26,10 @@ impl Game {
             .iter()
             .find(|x| x.get_position() == *p)
             .map(|x| x.get_id())
+    }
+
+    pub fn get_ref(&self, id: GameObjectId) -> &GameObject {
+        &self.game_objects[id]
     }
 
     pub fn take_turn(&mut self) {
@@ -81,7 +87,7 @@ impl Game {
                     self.game_objects[target].get_name()
                 );
 
-                let roll = 15;
+                let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
                 println!(
                     "{0} rolls to hit against AC {1}",
                     self.game_objects[source].get_name(),
@@ -89,7 +95,7 @@ impl Game {
                 );
 
                 if roll > self.game_objects[target].get_ac() {
-                    let damage = 3;
+                    let damage = DicePool::new(1, Dice::D6).dice_roll_sum().sum;
                     println!(
                         "{0} rolls {1} for damage",
                         self.game_objects[source].get_name(),
