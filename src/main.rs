@@ -16,8 +16,8 @@ fn main() {
     let c = Character::gen();
     let m = Monster::gen();
 
-    game.insert(c);
-    game.insert(m);
+    game.insert_character(c);
+    game.insert_monster(m);
     while !game.end {
         view::draw(&game);
         game.take_turn();
