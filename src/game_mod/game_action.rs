@@ -1,12 +1,14 @@
-use super::{game_object::GameObjectId, Direction};
+use super::game::{GameAttackSource, GameAttackTarget};
+use super::game_object::GameObjectId;
+use super::{Direction, GameBody};
 
 pub enum GameAction {
     MeleeAttack {
-        source: GameObjectId,
-        target: GameObjectId,
+        source: GameAttackSource,
+        target: GameAttackTarget,
     },
     Move {
-        target: GameObjectId,
+        target: GameBody,
         direction: Direction,
     },
     None,

@@ -35,7 +35,42 @@ pub struct GameMonster {
     ac: i32,
 }
 
+trait Position {
+    fn get_position(&self) -> Point;
+    fn set_position(&mut self, p: Point);
+}
+
+impl Position for GameCharacter {
+    fn get_position(&self) -> Point {
+        self.position
+    }
+
+    fn set_position(&mut self, p: Point) {
+        self.position = p;
+    }
+}
+
+impl Position for GameMonster {
+    fn get_position(&self) -> Point {
+        self.position
+    }
+
+    fn set_position(&mut self, p: Point) {
+        self.position = p;
+    }
+}
+
 pub enum GameBody {
+    Character(GameCharacterId),
+    Monster(GameMonsterId),
+}
+
+pub enum GameAttackTarget {
+    Character(GameCharacterId),
+    Monster(GameMonsterId),
+}
+
+pub enum GameAttackSource {
     Character(GameCharacterId),
     Monster(GameMonsterId),
 }
@@ -81,83 +116,20 @@ impl Game {
         }
     }
 
-    pub fn take_turn(&mut self) {
+    pub fn step(&mut self) {
         println!("turn {}", self.turn);
 
         if self.turn % 2 == 0 {
             let c = &self.characters[0];
 
-            let stdin = std::io::stdin();
-            let mut buf = String::new();
-            stdin.read_line(&mut buf).unwrap();
-            let trimmed = buf.trim().to_string();
-            let mut split = trimmed.split(' ');
-            let action = split.next().unwrap();
-            if action == "move" {
-                let dir_str = split.next().unwrap();
-                let direction: Direction = dir_str.parse().unwrap();
-
-                let new_position = c.position + Point::from(direction);
-                self.characters[0].position = new_position;
-            } else if action == "attack" {
-                println!(
-                    "{0} is attacking {1}",
-                    self.characters[0].name, self.monsters[0].name
-                );
-
-                let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
-                println!(
-                    "{0} rolls to hit against AC {1}",
-                    self.characters[0].name, roll
-                );
-
-                if roll > self.monsters[0].ac {
-                    let damage = DicePool::new(1, Dice::D6).dice_roll_sum().sum;
-                    println!("{0} rolls {1} for damage", self.characters[0].name, damage);
-                    self.monsters[0].hp -= damage;
-                    println!(
-                        "{0} takes {1} damage and now has {2} hp",
-                        self.monsters[0].name, damage, self.monsters[0].hp
-                    );
-                }
-            }
-
-            // let action = split.next().unwrap();
-            // if action == "move" {
-            //     let dir = split.next().unwrap();
-            //     GameAction::Move {
-            //         target: 0,
-            //         direction: dir.parse().unwrap(),
-            //     }
-            // } else if action == "attack" {
-            //     GameAction::MeleeAttack {
-            //         source: 0,
-            //         target: 1,
-            //     }
-            // } else {
-            //     GameAction::None
-            // }
+            self.apply(crate::input::game_action());
         } else {
-            println!(
-                "{0} is attacking {1}",
-                self.monsters[0].name, self.characters[0].name
-            );
+            let m = &self.monsters[0];
 
-            let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
-            println!(
-                "{0} rolls to hit against AC {1}",
-                self.monsters[0].name, roll
-            );
-
-            if roll > self.characters[0].ac {
-                let damage = DicePool::new(1, Dice::D6).dice_roll_sum().sum;
-                println!("{0} rolls {1} for damage", self.monsters[0].name, damage);
-                self.characters[0].hp -= damage;
-                println!(
-                    "{0} takes {1} damage and now has {2} hp",
-                    self.characters[0].name, damage, self.characters[0].hp
-                );
-            }
+            self.apply(GameAction::MeleeAttack {
+                source: GameAttackSource::Monster(0),
+                target: GameAttackTarget::Character(0),
+            });
         }
 
         // if self.turn % 2 == 0 {
@@ -216,57 +188,72 @@ impl Game {
     }
 
     pub fn apply(&mut self, game_action: GameAction) {
-        todo!()
-        // match game_action {
-        //     GameAction::MeleeAttack { source, target } => {
-        //         let source_position = self.game_objects[source].get_position();
-        //         if !self
-        //             .surrounding_game_objects(&source_position)
-        //             .iter()
-        //             .any(|x| *x == target)
-        //         {
-        //             println!("target is not in reach");
-        //             return ();
-        //         }
+        match game_action {
+            GameAction::None => println!("do nothing"),
 
-        //         println!(
-        //             "{0} is attacking {1}",
-        //             self.game_objects[source].get_name(),
-        //             self.game_objects[target].get_name()
-        //         );
+            GameAction::MeleeAttack { source, target } => match source {
+                GameAttackSource::Character(source_id) => match target {
+                    GameAttackTarget::Monster(target_id) => {
+                        let c = &mut self.monsters[source_id];
+                        let m = &mut self.characters[target_id];
+                        let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
 
-        //         let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
-        //         println!(
-        //             "{0} rolls to hit against AC {1}",
-        //             self.game_objects[source].get_name(),
-        //             roll
-        //         );
+                        println!("{0} is attacking {1}", m.name, c.name);
 
-        //         if roll > self.game_objects[target].get_ac() {
-        //             let damage = DicePool::new(1, Dice::D6).dice_roll_sum().sum;
-        //             println!(
-        //                 "{0} rolls {1} for damage",
-        //                 self.game_objects[source].get_name(),
-        //                 damage
-        //             );
-        //             self.game_objects[target].take_damage(damage);
-        //             println!(
-        //                 "{0} takes {1} damage and now has {2} hp",
-        //                 self.game_objects[target].get_name(),
-        //                 damage,
-        //                 self.game_objects[target].get_hp()
-        //             );
-        //         }
-        //     }
+                        let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
+                        println!("{0} rolls {1} to hit against AC {2}", m.name, roll, m.ac);
 
-        //     GameAction::Move { target, direction } => {
-        //         let prev_pos = self.game_objects[target].get_position();
-        //         self.game_objects[target].displace(direction.into());
-        //         let cur_pos = self.game_objects[target].get_position();
-        //         println!("move from {:?} to {:?}", prev_pos, cur_pos);
-        //     }
+                        if roll >= c.ac {
+                            let damage = DicePool::new(1, Dice::D6).dice_roll_sum().sum;
+                            println!("{0} rolls {1} for damage", m.name, damage);
+                            c.hp -= damage;
+                            println!(
+                                "{0} takes {1} damage and now has {2} hp",
+                                c.name, damage, c.hp
+                            );
+                        }
+                    }
+                    GameAttackTarget::Character(_) => todo!(),
+                },
+                GameAttackSource::Monster(source_id) => match target {
+                    GameAttackTarget::Character(target_id) => {
+                        let m = &mut self.monsters[source_id];
+                        let c = &mut self.characters[target_id];
+                        let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
 
-        //     GameAction::None => println!("do nothing"),
-        // }
+                        println!("{0} is attacking {1}", m.name, c.name);
+
+                        let roll = DicePool::new(1, Dice::D20).dice_roll_sum().sum;
+                        println!("{0} rolls {1} to hit against AC {2}", m.name, roll, m.ac);
+
+                        if roll >= c.ac {
+                            let damage = DicePool::new(1, Dice::D6).dice_roll_sum().sum;
+                            println!("{0} rolls {1} for damage", m.name, damage);
+                            c.hp -= damage;
+                            println!(
+                                "{0} takes {1} damage and now has {2} hp",
+                                c.name, damage, c.hp
+                            );
+                        }
+                    }
+                    GameAttackTarget::Monster(_) => todo!(),
+                },
+            },
+
+            GameAction::Move { target, direction } => match target {
+                GameBody::Character(id) => {
+                    let c = &mut self.characters[id];
+                    let new_position = c.position + Point::from(direction);
+                    println!("move from {:?} to {:?}", c.position, new_position);
+                    c.position = new_position;
+                }
+                GameBody::Monster(id) => {
+                    let m = &mut self.monsters[id];
+                    let new_position = m.position + Point::from(direction);
+                    println!("move from {:?} to {:?}", m.position, new_position);
+                    m.position = new_position;
+                }
+            },
+        }
     }
 }

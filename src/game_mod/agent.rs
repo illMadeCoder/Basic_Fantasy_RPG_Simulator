@@ -17,8 +17,8 @@ impl Agent {
     pub fn next_action(&self) -> GameAction {
         match self {
             Agent::PrototypeAgent { actor } => GameAction::MeleeAttack {
-                source: 1,
-                target: 0,
+                source: super::GameAttackSource::Monster(0),
+                target: super::GameAttackTarget::Character(0),
             },
             Agent::PlayerAgent { actor } => {
                 let stdin = std::io::stdin();
@@ -30,13 +30,13 @@ impl Agent {
                 if action == "move" {
                     let dir = split.next().unwrap();
                     GameAction::Move {
-                        target: 0,
+                        target: super::GameBody::Character(0),
                         direction: dir.parse().unwrap(),
                     }
                 } else if action == "attack" {
                     GameAction::MeleeAttack {
-                        source: 0,
-                        target: 1,
+                        source: super::GameAttackSource::Character(0),
+                        target: super::GameAttackTarget::Monster(0),
                     }
                 } else {
                     GameAction::None

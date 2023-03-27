@@ -3,6 +3,7 @@ mod character_mod;
 mod dice_expr_mod;
 mod game_mod;
 mod grid;
+mod input;
 mod item;
 mod monster;
 mod view;
@@ -20,6 +21,6 @@ fn main() {
     game.insert_monster(m);
     while !game.end {
         view::draw(&game);
-        game.take_turn();
+        game.step();
     }
 }
