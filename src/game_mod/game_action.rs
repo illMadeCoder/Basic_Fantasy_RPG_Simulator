@@ -8,7 +8,7 @@ pub enum GameAction {
         target: GameAttackTarget,
     },
     Move {
-        target: GameBody,
+        body: GameBody,
         direction: Direction,
     },
     None,

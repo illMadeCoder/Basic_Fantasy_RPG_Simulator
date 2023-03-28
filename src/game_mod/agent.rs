@@ -30,7 +30,7 @@ impl Agent {
                 if action == "move" {
                     let dir = split.next().unwrap();
                     GameAction::Move {
-                        target: super::GameBody::Character(0),
+                        body: super::GameBody::Character(0),
                         direction: dir.parse().unwrap(),
                     }
                 } else if action == "attack" {

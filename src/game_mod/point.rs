@@ -10,6 +10,21 @@ impl Point {
     pub fn new(x: i32, y: i32) -> Point {
         Point { x, y }
     }
+
+    pub fn set(&mut self, x: i32, y: i32) {
+        self.x = x;
+        self.y = y;
+    }
+
+    pub fn set_to(&mut self, other: &Point) {
+        self.x = other.x;
+        self.y = other.y;
+    }
+
+    pub fn add_to(&mut self, other: &Point) {
+        self.x += other.x;
+        self.y += other.y;
+    }
 }
 
 impl Add for Point {

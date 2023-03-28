@@ -1,7 +1,7 @@
 use crate::{
     character_mod::Character,
     dice_expr_mod::{Dice, DicePool},
-    game_mod::Direction,
+    game_mod::{direction, point, Direction},
     monster::Monster,
 };
 
@@ -35,34 +35,33 @@ pub struct GameMonster {
     ac: i32,
 }
 
-trait Position {
-    fn get_position(&self) -> Point;
-    fn set_position(&mut self, p: Point);
-}
-
-impl Position for GameCharacter {
-    fn get_position(&self) -> Point {
-        self.position
-    }
-
-    fn set_position(&mut self, p: Point) {
-        self.position = p;
-    }
-}
-
-impl Position for GameMonster {
-    fn get_position(&self) -> Point {
-        self.position
-    }
-
-    fn set_position(&mut self, p: Point) {
-        self.position = p;
-    }
-}
-
 pub enum GameBody {
     Character(GameCharacterId),
     Monster(GameMonsterId),
+}
+
+impl GameBody {
+    pub fn get_position<'a>(&self, game: &'a Game) -> &'a Point {
+        match self {
+            GameBody::Character(id) => &game.characters[*id].position,
+            GameBody::Monster(id) => &game.monsters[*id].position,
+        }
+    }
+
+    pub fn get_position_mut<'a>(&self, game: &'a mut Game) -> &'a mut Point {
+        match self {
+            GameBody::Character(id) => &mut game.characters[*id].position,
+            GameBody::Monster(id) => &mut game.monsters[*id].position,
+        }
+    }
+
+    pub fn set_position(&self, game: &mut Game, position: &Point) {
+        self.get_position_mut(game).set_to(position);
+    }
+
+    pub fn move_in_direction(&self, game: &mut Game, direction: Direction) {
+        self.set_position(game, &(*self.get_position(game) + Point::from(direction)));
+    }
 }
 
 pub enum GameAttackTarget {
@@ -188,6 +187,12 @@ impl Game {
     }
 
     pub fn apply(&mut self, game_action: GameAction) {
+        let move_point = |from: &mut Point, vector: &Point| {
+            let prev = from.clone();
+            from.add_to(vector);
+            println!("move from {:?} to {:?}", prev, from);
+        };
+
         match game_action {
             GameAction::None => println!("do nothing"),
 
@@ -215,6 +220,7 @@ impl Game {
                     }
                     GameAttackTarget::Character(_) => todo!(),
                 },
+
                 GameAttackSource::Monster(source_id) => match target {
                     GameAttackTarget::Character(target_id) => {
                         let m = &mut self.monsters[source_id];
@@ -239,21 +245,7 @@ impl Game {
                     GameAttackTarget::Monster(_) => todo!(),
                 },
             },
-
-            GameAction::Move { target, direction } => match target {
-                GameBody::Character(id) => {
-                    let c = &mut self.characters[id];
-                    let new_position = c.position + Point::from(direction);
-                    println!("move from {:?} to {:?}", c.position, new_position);
-                    c.position = new_position;
-                }
-                GameBody::Monster(id) => {
-                    let m = &mut self.monsters[id];
-                    let new_position = m.position + Point::from(direction);
-                    println!("move from {:?} to {:?}", m.position, new_position);
-                    m.position = new_position;
-                }
-            },
+            GameAction::Move { body, direction } => body.move_in_direction(self, direction),
         }
     }
 }

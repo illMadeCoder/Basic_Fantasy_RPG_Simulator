@@ -61,7 +61,7 @@ pub fn game_action() -> GameAction {
         let direction: Direction = dir_str.parse().unwrap();
         GameAction::Move {
             direction,
-            target: GameBody::Character(0),
+            body: GameBody::Character(0),
         }
     } else if action == "attack" {
         GameAction::MeleeAttack {
