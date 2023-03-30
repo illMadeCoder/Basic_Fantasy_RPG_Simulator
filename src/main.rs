@@ -8,7 +8,7 @@ mod monster;
 mod view;
 
 use character_mod::Character;
-use game_mod::{Game, Actor, Point};
+use game_mod::{Game, Actor, Point, Behavior};
 use monster::Monster;
 
 fn main() {
@@ -17,12 +17,14 @@ fn main() {
 
     let actor_character = Actor {
         position: Point { x: 0, y: 0 },
-        hp: 10
+        hp: 10,
+	behavior: Behavior::Wonder
     };
 
     let actor_monster = Actor {
         position: Point { x: 0, y: 0 },
-        hp: 10
+        hp: 10,
+	behavior: Behavior::Agressive
     };
 
     let mut game = Game::new(vec![actor_character, actor_monster]);

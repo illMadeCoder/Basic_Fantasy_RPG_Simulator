@@ -1,12 +1,18 @@
 use super::point::Point;
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Direction {
     Left,
     Right,
     Up,
     Down,
+}
+
+impl Direction {
+    pub fn rnd() -> Direction {
+	Direction::Left
+    }
 }
 
 pub const DIRECTIONS: &[Direction] = &[
