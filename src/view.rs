@@ -11,15 +11,8 @@ pub fn draw(game: &Game) {
                 print!("{}", y);
             }
             let point = Point { x, y };
-            let c = match game.get_at(&point) {
-                Some(body) => match body {
-                    crate::game_mod::GameBody::Character(_) => 'C',
-                    crate::game_mod::GameBody::Monster(_) => 'M',
-                },
-                None => '.',
-            };
 
-            print!(" {}", c);
+            print!(" {}", '.');
         }
         // spacing
         println!();

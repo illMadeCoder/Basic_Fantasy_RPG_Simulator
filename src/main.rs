@@ -2,25 +2,36 @@
 mod character_mod;
 mod dice_expr_mod;
 mod game_mod;
-mod grid;
 mod input;
 mod item;
 mod monster;
 mod view;
 
 use character_mod::Character;
-use game_mod::Game;
+use game_mod::{Game, Actor, Point};
 use monster::Monster;
 
 fn main() {
-    let mut game = Game::new();
-    let c = Character::gen();
-    let m = Monster::gen();
+    let character = Character::gen();
+    let monster = Monster::gen();
 
-    game.insert_character(c);
-    game.insert_monster(m);
-    while !game.end {
-        view::draw(&game);
-        game.step();
+    let actor_character = Actor {
+        position: Point { x: 0, y: 0 },
+        hp: 10
+    };
+
+    let actor_monster = Actor {
+        position: Point { x: 0, y: 0 },
+        hp: 10
+    };
+
+    let mut game = Game::new(vec![actor_character, actor_monster]);
+    
+    loop {
+	game.step();
     }
+    
+    // game.insert_character(c);
+    // game.insert_monster(m);
+    // view::draw(&game);
 }
