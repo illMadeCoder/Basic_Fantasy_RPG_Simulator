@@ -8,32 +8,34 @@ mod monster;
 mod view;
 
 use character_mod::Character;
-use game_mod::{Game, Actor, Point, Behavior};
+use core::time::Duration;
+use game_mod::{Actor, Behavior, Game, Point};
 use monster::Monster;
+use std::{thread, time};
 
 fn main() {
     let character = Character::gen();
     let monster = Monster::gen();
 
     let actor_character = Actor {
-        position: Point { x: 0, y: 0 },
+        name: character.name.clone(),
+        position: Point { x: 2, y: 3 },
         hp: 10,
-	behavior: Behavior::Wonder
+        behavior: Behavior::Player,
     };
 
     let actor_monster = Actor {
-        position: Point { x: 0, y: 0 },
+        name: monster.name.clone(),
+        position: Point { x: 3, y: 5 },
         hp: 10,
-	behavior: Behavior::Agressive
+        behavior: Behavior::Agressive,
     };
 
     let mut game = Game::new(vec![actor_character, actor_monster]);
-    
+
     loop {
-	game.step();
+        view::draw(&game);
+        game.step();
+        thread::sleep(time::Duration::from_secs(1));
     }
-    
-    // game.insert_character(c);
-    // game.insert_monster(m);
-    // view::draw(&game);
 }

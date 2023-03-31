@@ -16,12 +16,12 @@ impl Point {
         self.y = y;
     }
 
-    pub fn set_to(&mut self, other: &Point) {
+    pub fn set_to(&mut self, other: Point) {
         self.x = other.x;
         self.y = other.y;
     }
 
-    pub fn add_to(&mut self, other: &Point) {
+    pub fn add_to(&mut self, other: Point) {
         self.x += other.x;
         self.y += other.y;
     }
