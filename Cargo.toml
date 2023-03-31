@@ -9,3 +9,11 @@ edition = "2021"
 rand = "0.8.4"
 regex = "1"
 names = "0.14.0"
+
+[lib]
+name = "basic_fantasy_rpg_simulator"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cli"
+path = "src/main.rs"

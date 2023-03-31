@@ -1,5 +1,4 @@
-use crate::game_mod::Point;
-use crate::Game;
+use crate::game_mod::{Game, Point};
 
 pub fn draw(game: &Game) {
     // header units

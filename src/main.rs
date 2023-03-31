@@ -1,19 +1,14 @@
 #![allow(dead_code)]
-mod character_mod;
-mod dice_expr_mod;
-mod game_mod;
-mod input;
-mod item;
-mod monster;
-mod view;
-
-use character_mod::Character;
-use core::time::Duration;
-use game_mod::{Actor, Behavior, Game, Point};
-use monster::Monster;
 use std::{thread, time};
 
-fn main() {
+use basic_fantasy_rpg_simulator::{
+    character_mod::Character,
+    game_mod::{Actor, Behavior, Game, Point},
+    monster::Monster,
+    view,
+};
+
+fn main() -> ! {
     let character = Character::gen();
     let monster = Monster::gen();
 
